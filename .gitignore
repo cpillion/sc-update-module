@@ -1,3 +1,6 @@
+#libsc outputs
+sample/server/libsc/outputs
+
 # Logs
 logs
 *.log
