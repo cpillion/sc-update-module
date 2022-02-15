@@ -7,7 +7,7 @@
 #include "sc_assemblytree.h"
 
 #if 0
-#    include "tc_io.h"
+#include "tc_io.h"
 void recursiveDeleteDirectory(std::string file_system_directory_path)
 {
 	using namespace TC::IO;
@@ -15,29 +15,30 @@ void recursiveDeleteDirectory(std::string file_system_directory_path)
 	remove_all(file_path);
 }
 #else
-void
-recursiveDeleteDirectory(std::string file_system_directory_path)
-{}
+void recursiveDeleteDirectory(std::string file_system_directory_path)
+{
+}
 #endif
 
-class ApplicationLogger: public SC::Store::Logger {
+class ApplicationLogger : public SC::Store::Logger
+{
 public:
     virtual void
-    Message(const char* message) const
+    Message(const char *message) const
     {
         printf("%s\n", message);
     }
 };
 
-int
-StoreSample(const std::string& model_path)
+int StoreSample(const std::string &model_path)
 {
 
     std::string model_name = "microengine";
 
     ApplicationLogger logger;
 
-    try {
+    try
+    {
         // Open the cache.
         SC::Store::Database::SetLicense(HOOPS_LICENSE);
         SC::Store::Cache cache = SC::Store::Database::Open(logger);
@@ -46,19 +47,21 @@ StoreSample(const std::string& model_path)
         file_path_string += "/";
         file_path_string += model_name;
         std::string scz_file_path_string = file_path_string + ".scz";
+        std::string xml_file_path_string = file_path_string + ".xml";
 
-        // Does the model in question exist?
-        if (cache.Exists(file_path_string.c_str())) {
-            // delete the model (if desired).
-            recursiveDeleteDirectory(file_path_string);
-        }
+        // // Does the model in question exist?
+        // if (cache.Exists(file_path_string.c_str())) {
+        //     // delete the model (if desired).
+        //     recursiveDeleteDirectory(file_path_string);
+        // }
 
         SC::Store::Database::DecompressSCZ(scz_file_path_string.c_str(), file_path_string.c_str(), logger);
 
         // Query existing models.
-        size_t             count;
-        const char* const* names = cache.GetModelPaths(count);
-        for (size_t i = 0; i < count; ++i) {
+        size_t count;
+        const char *const *names = cache.GetModelPaths(count);
+        for (size_t i = 0; i < count; ++i)
+        {
             printf("%u:\t%s\n", (unsigned int)i, names[i]);
         }
 
@@ -67,66 +70,44 @@ StoreSample(const std::string& model_path)
         auto modelName = model.GetName();
         printf("%s\n", modelName);
 
-
-
-        SC::Store::InclusionKey model_inclusion_key = model.Include(model);
-
         // These keys will get populated later in this function.
-        SC::Store::MeshKey      mesh_key;
-        SC::Store::MaterialKey  red_material_key;
-        SC::Store::MaterialKey  green_material_key;
-        SC::Store::MaterialKey  blue_material_key;
-        SC::Store::MatrixKey    matrix_key;
-        SC::Store::InstanceKey  instance_key_1;
-        SC::Store::InstanceKey  instance_key_2;
-        SC::Store::InstanceKey  instance_key_3;
-        SC::Store::InstanceKey  instance_key_4;
+        SC::Store::MeshKey mesh_key;
+        SC::Store::MaterialKey red_material_key;
+        SC::Store::MaterialKey green_material_key;
+        SC::Store::MaterialKey blue_material_key;
+        SC::Store::MatrixKey matrix_key;
+        SC::Store::InstanceKey instance_key_1;
+        SC::Store::InstanceKey instance_key_2;
+        SC::Store::InstanceKey instance_key_3;
+        SC::Store::InstanceKey instance_key_4;
         SC::Store::AssemblyTree assembly_tree(logger);
 
         // Load/Author assembly tree.
         {
-            // // Create root node.
-            // uint32_t root_id = 0;
-            // assembly_tree.CreateAssemblyTreeRoot(root_id);
-            // assembly_tree.SetNodeName(root_id, "sample model");
+            if (assembly_tree.DeserializeFromXML(xml_file_path_string.c_str()))
+            {
+                assembly_tree.SetNodeName(0, "chris overwrite");
+                // Add an attribute on that node.
+                assembly_tree.AddAttribute(
+                    0, "chris's attribute", SC::Store::AssemblyTree::AttributeTypeString,
+                    "dope if this works");
 
-            // // Add a first child.
-            // uint32_t first_child = 0;
-            // assembly_tree.CreateChild(root_id, first_child);
-            // assembly_tree.SetNodeName(first_child, "first child");
-
-            // // Create body instance nodes and register the mesh instances we got.
-            // uint32_t body_instance_node = 0;
-            // assembly_tree.CreateAndAddBodyInstance(first_child, body_instance_node);
-            // assembly_tree.SetBodyInstanceMeshInstanceKey(
-            //     body_instance_node, SC::Store::InstanceInc(model_inclusion_key, instance_key_1));
-            // assembly_tree.CreateAndAddBodyInstance(first_child, body_instance_node);
-            // assembly_tree.SetBodyInstanceMeshInstanceKey(
-            //     body_instance_node, SC::Store::InstanceInc(model_inclusion_key, instance_key_2));
-
-            // // Add a first child.
-            // uint32_t second_child = 0;
-            // assembly_tree.CreateChild(root_id, second_child);
-            // assembly_tree.SetNodeName(second_child, "second child");
-
-            // // Create body instance nodes and register mesh instance.
-            // assembly_tree.CreateAndAddBodyInstance(second_child, body_instance_node);
-            // assembly_tree.SetBodyInstanceMeshInstanceKey(
-            //     body_instance_node, SC::Store::InstanceInc(model_inclusion_key, instance_key_3));
-
-            // // Add an attribute on that node.
-            // assembly_tree.AddAttribute(
-            //     second_child, "sample attribute", SC::Store::AssemblyTree::AttributeTypeString,
-            //     "sample value");
-
-            // Serialize authored content to model.
-            //assembly_tree.SerializeToModel(model);
+                // Serialize authored content to model.
+                assembly_tree.SerializeToModel(model);
+            }
+            else
+            {
+                // 02/14/2022: Bug? Apparently the returned major version in 2022 is 9, whereas the 2022 xml from converter
+                // authors Major Version 22!
+                printf("Could not load XML. Assembly Tree Major Version must be lower than: %u\n", SC::Store::AssemblyTree::MAJOR_VERSION);
+            }
         }
 
-
         // Prepare the model for streaming.
-        //model.PrepareStream();
-    } catch (std::exception const& e) {
+        model.PrepareStream();
+    }
+    catch (std::exception const &e)
+    {
         std::string message("Exception: ");
         message.append(e.what());
         message.append("\n");

@@ -8,7 +8,7 @@
             "name": "(lldb) Launch libsc sample",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/sample/server/libsc/src/libsc_sample",
+            "program": "${workspaceFolder}/sample/server/libsc/outputs/libsc_sample",
             "args": ["${workspaceFolder}/sample/server/libsc/outputs/modelData"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
