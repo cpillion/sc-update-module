@@ -30,7 +30,7 @@ export default class UIToolbar extends React.Component {
                 <button id="add-property-button" onClick={() => {
                     this.addNodeProperties();
                 }
-                }>Add Property</button>
+                }>Add Node Property</button>
             </>
         )
     }
