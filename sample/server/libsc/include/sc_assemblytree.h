@@ -256,7 +256,8 @@ enum class RelationshipType : uint32_t {
     Aggregates,
     VoidsElement,
     FillsElement,
-    SpaceBoundary
+    SpaceBoundary,
+    ConnectsPathElements,
 };
 
 struct RelationshipElement {
@@ -269,6 +270,12 @@ struct RelationshipData {
     RelationshipType                 type;
     RelationshipElement              relating;
     std::vector<RelationshipElement> related;
+};
+
+struct UnitData {
+    uint32_t symbolUnit;
+    int32_t  exponent;
+    double   factor;
 };
 
 //! AssemblyTree API
@@ -419,11 +426,12 @@ public:
     @param attributeValue Attribute value.
     @return true if all went right, false otherwise.*/
     bool AddAttribute(
-        NodeId        nodeID,
-        const char*   attributeSetName,
-        const char*   attributeName,
-        AttributeType attributeType,
-        const char*   attributeValue);
+        NodeId                           nodeID,
+        const char*                      attributeSetName,
+        const char*                      attributeName,
+        AttributeType                    attributeType,
+        const char*                      attributeValue,
+        std::vector<SC::Store::UnitData> attributeUnit);
 
     /*! <p>Set a Generic ID to the node.</p>
     @param nodeID Node ID.
