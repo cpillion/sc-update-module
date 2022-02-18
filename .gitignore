@@ -2,6 +2,8 @@
 sample/server/libsc/outputs/
 sample/server/libsc/include/hoops_license.h
 
+package-lock.json
+
 # Logs
 logs
 *.log

@@ -1,5 +1,5 @@
 import React from "react";
-import scUpdate from "./sc-update";
+import scUpdate from "./sc-update-client";
 
 export default class UIToolbar extends React.Component {
 
@@ -27,6 +27,12 @@ export default class UIToolbar extends React.Component {
         }
     }
 
+    updateDefaultView() {
+        let camera = this.props.viewer.view.getCamera();
+        this.scUpdate.updateDefaultCameraView(camera);
+        this.scUpdate.sendToLibSc();
+    }
+
 
     render() {
         return(
@@ -40,6 +46,10 @@ export default class UIToolbar extends React.Component {
                     this.addNodeProperties();
                 }
                 }>Add Node Property</button>
+                <button id="update-view-button" onClick={() => {
+                    this.updateDefaultView();
+                }
+                }>Update Default View</button>
             </>
         )
     }

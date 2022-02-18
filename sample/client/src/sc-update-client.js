@@ -3,7 +3,7 @@ import io from "socket.io-client";
 export default class scUpdate {
 
     constructor(libScServerEndpoint) {
-        this.scChanges = {attributes: [], camera: null};
+        this.scChanges = {attributes: [], defaultCamera: null};
         this.socket = io(libScServerEndpoint, { transports: ["websocket"] });
 
         // Socket.io error info for debugging
@@ -19,6 +19,10 @@ export default class scUpdate {
         }
         let updateInfo = Object.assign(nodeInfo, nodeAttributes)
         this.scChanges.attributes.push(updateInfo);
+    }
+
+    updateDefaultCameraView(camera) {
+        this.scChanges.defaultCamera = camera;
     }
 
     sendToLibSc() {
