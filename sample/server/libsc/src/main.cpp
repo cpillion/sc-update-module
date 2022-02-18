@@ -3,7 +3,7 @@
 #include <iostream>
 #include <algorithm>
 
-int StoreSample(const std::string&);
+int StoreSample(const std::string&, const std::string&);
 
 void Usage();
 
@@ -17,14 +17,16 @@ main(int argc, char** argv)
     }
     
     std::string model_path = argv[1];
-
-    StoreSample(model_path); 
+    std::string modelname = argv[2];       
+    StoreSample(model_path, modelname); 
 
 }
 
 void
 Usage()
 {
-    std::cout << "Usage: libsc_sample model_folder" << std::endl;
+    std::cout << "Usage: libsc_sample model_folder modelname" << std::endl;
     std::cout << "model_folder\tName of output directory." << std::endl;
+    std::cout << "modelname\tName of model to author or edit." << std::endl;
+
 }

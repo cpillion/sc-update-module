@@ -30,10 +30,8 @@ public:
     }
 };
 
-int StoreSample(const std::string &model_path)
+int StoreSample(const std::string &model_output_path, const std::string &model_name = "sc-model-default")
 {
-
-    std::string model_name = "microengine";
 
     ApplicationLogger logger;
 
@@ -43,11 +41,11 @@ int StoreSample(const std::string &model_path)
         SC::Store::Database::SetLicense(HOOPS_LICENSE);
         SC::Store::Cache cache = SC::Store::Database::Open(logger);
 
-        std::string file_path_string = model_path;
-        file_path_string += "/";
-        file_path_string += model_name;
-        std::string scz_file_path_string = file_path_string + ".scz";
-        std::string xml_file_path_string = file_path_string + ".xml";
+        std::string output_path = model_output_path;
+        output_path += "/";
+        output_path += model_name;
+        std::string scz_output_path = output_path + ".scz";
+        std::string xml_output_path = output_path + ".xml";
 
         // // Does the model in question exist?
         // if (cache.Exists(file_path_string.c_str())) {
@@ -55,7 +53,11 @@ int StoreSample(const std::string &model_path)
         //     recursiveDeleteDirectory(file_path_string);
         // }
 
-        SC::Store::Database::DecompressSCZ(scz_file_path_string.c_str(), file_path_string.c_str(), logger);
+
+        // Check if model SCZ and XML already exists
+        auto scz_status = static_cast<std::string>(SC::Store::Database::QuerySCZ(scz_output_path.c_str(), logger));
+
+        SC::Store::Database::DecompressSCZ(scz_output_path.c_str(), output_path.c_str(), logger);
 
         // Query existing models.
         size_t count;
@@ -66,7 +68,7 @@ int StoreSample(const std::string &model_path)
         }
 
         // Open (or Create) the model we care about.
-        SC::Store::Model model = cache.Open(file_path_string.c_str());
+        SC::Store::Model model = cache.Open(output_path.c_str());
         auto modelName = model.GetName();
         printf("%s\n", modelName);
 
@@ -84,7 +86,7 @@ int StoreSample(const std::string &model_path)
 
         // Load/Author assembly tree.
         {
-            if (assembly_tree.DeserializeFromXML(xml_file_path_string.c_str()))
+            if (assembly_tree.DeserializeFromXML(xml_output_path.c_str()))
             {
                 assembly_tree.SetNodeName(0, "chris overwrite");
                 // Add an attribute on that node.
@@ -92,13 +94,12 @@ int StoreSample(const std::string &model_path)
                     0, "chris's attribute", SC::Store::AssemblyTree::AttributeTypeString,
                     "dope if this works");
 
-                // Serialize authored content to model.
+                // Serialize authored content to model and xml output
+                assembly_tree.SerializeToXML(xml_output_path.c_str());
                 assembly_tree.SerializeToModel(model);
             }
             else
             {
-                // 02/14/2022: Bug? Apparently the returned major version in 2022 is 9, whereas the 2022 xml from converter
-                // authors Major Version 22!
                 printf("Could not load XML. Assembly Tree Major Version must be lower than: %u\n", SC::Store::AssemblyTree::MAJOR_VERSION);
             }
         }
