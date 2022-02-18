@@ -9,7 +9,10 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/sample/server/libsc/outputs/libsc_sample",
-            "args": ["${workspaceFolder}/sample/server/libsc/outputs/modelData"],
+            "args": [
+                "${workspaceFolder}/sample/server/libsc/outputs/modelCache",
+                "microengine"
+            ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [{ "name": "LD_LIBRARY_PATH", "value": "${workspaceFolder}/sample/server/libsc/bin/macos/" }],
