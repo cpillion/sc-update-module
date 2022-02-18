@@ -14,7 +14,7 @@ export default class scUpdate {
   updateAttributes(nodeId, nodeAttributes) {
     //Need to add check if nodeId already has attribute updates associated
     let nodeInfo = {
-      "nodeId": nodeId,
+      nodeId: nodeId,
     };
     let updateInfo = Object.assign(nodeInfo, nodeAttributes);
     this.scChanges.attributes.push(updateInfo);
@@ -25,12 +25,14 @@ export default class scUpdate {
   }
 
   // Will need to update this for using something like a color map in HC
-  updateColors(nodeIds, color) {
-    let updateInfo = {
-      "nodeIds": nodeIds,
-      "color": color.toJson()
-    };
-    this.scChanges.colors.push(updateInfo);
+  updateColors(colorMap) {
+    colorMap.forEach((value, key) => {
+      let nodeInfo = {
+        nodeId: key,
+        color: value,
+      };
+      this.scChanges.colors.push(nodeInfo);
+    });
   }
 
   sendToLibSc() {

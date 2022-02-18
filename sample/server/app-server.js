@@ -21,7 +21,7 @@ io.on('connection', (socket) => {
   console.log(`Connection to Client established.`);
 
   socket.on('sc_update_to_author', (libSCdataJSON) => {
-    console.log(JSON.parse(libSCdataJSON))
+    console.log(libSCdataJSON)
     //let libSCdata = JSON.parse(libSCdataJSON);
     // const child = execFile(
     //   path.join(__dirname, 'libsc/outputs/libsc_sample'),

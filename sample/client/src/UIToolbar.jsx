@@ -34,8 +34,13 @@ export default class UIToolbar extends React.Component {
 
   updateModelColors() {
     let nodeIds = [8,9,10,11]; // Screws nodeIds
-    let color = new Communicator.Color.red();
-    this.scUpdate.updateColors(nodeIds, color);
+    let color = new Communicator.Color.green();
+    let colorMap = new Map();
+    for (let nodeId of nodeIds) {
+        colorMap.set(nodeId, color);
+    }
+    this.props.viewer.model.setNodesColors(colorMap );
+    this.scUpdate.updateColors(colorMap);
     this.scUpdate.sendToLibSc();
   }
 
