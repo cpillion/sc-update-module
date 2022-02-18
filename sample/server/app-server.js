@@ -20,15 +20,20 @@ const { execFile } = require('child_process');
 io.on('connection', (socket) => {
   console.log(`Connection to Client established.`);
 
+  // Probably want to send over the model name we are working with too, so we can 
+  // locate it in the cache. Working with one model now, but could have multiple 
+  // loaded into the viewer
+
+
   socket.on('sc_update_to_author', (libSCdataJSON) => {
-	  console.log(JSON.parse(libSCdataJSON))
-    let libSCdata = JSON.parse(libSCdataJSON);
+	//console.log(JSON.parse(libSCdataJSON))
+    //let libSCdata = JSON.parse(libSCdataJSON);
     const child = execFile(
       path.join(__dirname, "libsc/outputs/libsc_sample"),
       [
         path.join(__dirname, "libsc/outputs/modelCache"),
         'microengine',
-        //libSCdata.attributes
+        libSCdataJSON
       ],
 	  {
 		  env: {"LD_LIBRARY_PATH": path.join(__dirname, "/libsc/bin/macos/") }
