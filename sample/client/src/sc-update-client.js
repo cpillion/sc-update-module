@@ -35,6 +35,10 @@ export default class scUpdate {
     });
   }
 
+  updateMeshes(nodeId, parentNodeId, meshData) {
+      // Need to parse meshdatacopy and put into JSON. BLAH!
+  }
+
   sendToLibSc() {
     this.socket.emit('sc_update_to_author', JSON.stringify(this.scChanges));
     // Add method to clear tracked updates once they are successfully published.
