@@ -1,0 +1,24 @@
+{
+  "name": "sc-update-module",
+  "version": "1.0.0",
+  "description": "Sample module that hooks into HOOPS Communicator and allows for client-side updates to stream cache models",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd sample/server && node app-server.js",
+    "client": "cd sample/client && npm run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cpillion/sc-update-module.git"
+  },
+  "author": "TS3D",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cpillion/sc-update-module/issues"
+  },
+  "homepage": "https://github.com/cpillion/sc-update-module#readme",
+  "dependencies": {
+    "concurrently": "^7.0.0"
+  }
+}
