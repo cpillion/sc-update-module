@@ -13,7 +13,10 @@ This project is intended to be a simple framework for udpating your Stream Cache
 
 2. The package.json file in the sample root directory has three scripts - `start`, `client`, and `server`. All can be run with `npm {scriptName}`.  To start both the client and server, run `npm start`
 
-3. The client code can run out of the box, but we will need to build our libsc exectuable to be called by the server. You can use your own method to do this, but there are VS Code task.json and launch.json files to help build and debug your code in VSCode. Whatever you choose, you will need to link the approprate libsc libraries, and ensure that the libhps_core.dylib (or .dll or .so) is findable in your system path. See tasks.json for sample compile params. Notice that in launch.json, we are specifiying the LD_LIBRARY_PATH (assuming Mac for now).
+3. Create an outputs/modelData and outputs/modelData/xmlAssembly in your libsc directory, for model outputs to be written to (need to set this up in the repo so it is already there).  Libsc will write to these directories. An output directory must exist before writing the Cache (I currently have outputs ignored by git so they do not push to remote).
+
+
+4. The client code can run out of the box, but we will need to build our libsc exectuable to be called by the server. You can use your own method to do this, but there are VS Code task.json and launch.json files to help build and debug your code in VSCode. Whatever you choose, you will need to link the approprate libsc libraries, and ensure that the libhps_core.dylib (or .dll or .so) is findable in your system path. See tasks.json for sample compile params. Notice that in launch.json, we are specifiying the LD_LIBRARY_PATH (assuming Mac for now).
 
 
 ## Sample Use Cases
