@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd sample/server && node app-server.js",
-    "client": "cd sample/client && npm run start"
+    "server": "cd server && node app-server.js",
+    "client": "cd client && npm run start"
   },
   "repository": {
     "type": "git",

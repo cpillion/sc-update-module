@@ -1,5 +1,5 @@
 #libsc outputs
-sample/server/libsc/outputs
+sample/server/libsc/outputs/
 sample/server/libsc/include/hoops_license.h
 
 # Logs
