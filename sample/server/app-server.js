@@ -22,21 +22,24 @@ io.on('connection', (socket) => {
 
   socket.on('sc_update_to_author', (libSCdataJSON) => {
 	  console.log(JSON.parse(libSCdataJSON))
-    // let libSCdata = JSON.parse(libSCdataJSON);
-    // const child = execFile(
-    //   'libsc/outputs/libsc_sample',
-    //   [
-    //     '${workspaceFolder}/sample/server/libsc/outputs/modelCache',
-    //     'microengine',
-    //     //libSCdata.attributes
-    //   ],
-    //   (error, stdout, stderr) => {
-    //     if (error) {
-    //       throw error;
-    //     }
-    //     console.log(stdout);
-    //   }
-    // );
+    let libSCdata = JSON.parse(libSCdataJSON);
+    const child = execFile(
+      path.join(__dirname, "libsc/outputs/libsc_sample"),
+      [
+        path.join(__dirname, "libsc/outputs/modelCache"),
+        'microengine',
+        //libSCdata.attributes
+      ],
+	  {
+		  env: {"LD_LIBRARY_PATH": path.join(__dirname, "/libsc/bin/macos/") }
+	  },
+      (error, stdout, stderr) => {
+        if (error) {
+          throw error;
+        }
+        console.log(stdout);
+      }
+    );
   });
 
   socket.on('disconnect', () => {
