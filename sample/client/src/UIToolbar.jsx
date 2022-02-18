@@ -1,11 +1,11 @@
 import React from "react";
-import io from "socket.io-client";
+import scUpdate from "./sc-update";
 
 export default class UIToolbar extends React.Component {
 
     constructor() {
         super();
-        this.socket = io("http://localhost:5000", { transports: ["websocket"] });
+        this.scUpdate = new scUpdate("http://localhost:5000");
     }
 
     addNodeProperties() {
@@ -22,21 +22,13 @@ export default class UIToolbar extends React.Component {
             let propertyValue = prompt(`Enter the value for the ${propertyName} property: `, "");
             nodeId = selectionResults[0].getNodeId;
             // Use SC Update functions to send this data to the client - will need selected nodeID as well
-            let libSCdata = {
-                attributes: [{
-                    "nodeId": nodeId,
-                    [propertyName]: propertyValue
-                }]
-            }
-            this.socket.emit('sc_update_to_author', JSON.stringify(libSCdata));
+            this.scUpdate.updateAttributes(nodeId, {[propertyName]:propertyValue});
+            this.scUpdate.sendToLibSc();
         }
     }
 
 
     render() {
-        this.socket.on("connect_error", (err) => {
-            console.log(`connect_error due to ${err.message}`);
-          });
         return(
             <>
                 <button id="home-button" onClick={() => {
