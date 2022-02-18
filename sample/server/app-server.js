@@ -1,33 +1,50 @@
 var express = require('express');
-var socket = require('socket.io');
+var { Server } = require('socket.io');
 var path = require('path');
 var app = express();
-var http = require('http')
-var server = http.createServer(app);
-var io = socket(server);
+var http = require('http');
 
-server.listen(5000, () => {
-	console.log('Listening on *:5000');
+const httpServer = http.createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http//:localhost:3000',
+  },
 });
+const { execFile } = require('child_process');
 
 // Serve the build
 // app.get('/', function (req, res) {
 // 	res.sendFile('index.html');
 // });
 
+io.on('connection', (socket) => {
+  console.log(`Connection to Client established.`);
 
-io.on('connection', socket => {
+  socket.on('sc_update_to_author', (libSCdataJSON) => {
+	  console.log(JSON.parse(libSCdataJSON))
+    // let libSCdata = JSON.parse(libSCdataJSON);
+    // const child = execFile(
+    //   'libsc/outputs/libsc_sample',
+    //   [
+    //     '${workspaceFolder}/sample/server/libsc/outputs/modelCache',
+    //     'microengine',
+    //     //libSCdata.attributes
+    //   ],
+    //   (error, stdout, stderr) => {
+    //     if (error) {
+    //       throw error;
+    //     }
+    //     console.log(stdout);
+    //   }
+    // );
+  });
 
-	usersConnected += 1;
-	//io.emit('userConnectChange', usersConnected );
-	console.log(`Connection to Client established.`);
-
-
-	socket.on('updateAttributes', () => {
-	})
-
-	socket.on('disconnect', () => {
-		console.log(`Connection terminated.`);
-	 });
+  socket.on('disconnect', () => {
+    console.log(`Connection terminated.`);
+  });
 });
 
+
+httpServer.listen(5000, () => {
+	console.log('Listening on *:5000');
+  });
