@@ -1,33 +1,53 @@
 var express = require('express');
-var socket = require('socket.io');
+var { Server } = require('socket.io');
 var path = require('path');
 var app = express();
-var http = require('http')
-var server = http.createServer(app);
-var io = socket(server);
+var http = require('http');
 
-server.listen(5000, () => {
-	console.log('Listening on *:5000');
+const httpServer = http.createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: 'http//:localhost:3000',
+  },
 });
+const { execFile } = require('child_process');
 
 // Serve the build
 // app.get('/', function (req, res) {
 // 	res.sendFile('index.html');
 // });
 
+io.on('connection', (socket) => {
+  console.log(`Connection to Client established.`);
 
-io.on('connection', socket => {
+  socket.on('sc_update_to_author', (libSCdataJSON) => {
+    console.log(libSCdataJSON)
+    //let libSCdata = JSON.parse(libSCdataJSON);
+    // const child = execFile(
+    //   path.join(__dirname, 'libsc/outputs/libsc_sample'),
+    //   [path.join(__dirname, 'libsc/outputs/modelCache'), 'microengine', libSCdataJSON],
+    //   {
+    //     env: { LD_LIBRARY_PATH: path.join(__dirname, '/libsc/bin/macos/') },
+    //   },
+    //   (error, stdout, stderr) => {
+    //     if (error) {
+    //       throw error;
+    //     }
+    //     console.log(stdout);
+    //   }
+    // );
+  });
 
-	usersConnected += 1;
-	//io.emit('userConnectChange', usersConnected );
-	console.log(`Connection to Client established.`);
+  // Probably want to send over the model name we are working with too, so we can
+  // locate it in the cache. Working with one model now, but could have multiple
+  // loaded into the viewer
+  socket.on('viewer-models-loaded', () => {});
 
-
-	socket.on('updateAttributes', () => {
-	})
-
-	socket.on('disconnect', () => {
-		console.log(`Connection terminated.`);
-	 });
+  socket.on('disconnect', () => {
+    console.log(`Connection terminated.`);
+  });
 });
 
+httpServer.listen(5000, () => {
+  console.log('Listening on *:5000');
+});
