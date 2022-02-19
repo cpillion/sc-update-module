@@ -35,18 +35,20 @@ public:
 };
 
 // Helper function to literally just save a file copy to file.orig
-void backupFiletoOrig(std::string &file_path){
+void backupFiletoOrig(std::string &file_path)
+{
     std::string orig_file_path = file_path + ".orig";
-    std::ofstream  orig_file_stream(orig_file_path,   std::ios::binary);
-    std::ifstream  file_path_stream(file_path, std::ios::binary);
+    std::ofstream orig_file_stream(orig_file_path, std::ios::binary);
+    std::ifstream file_path_stream(file_path, std::ios::binary);
     orig_file_stream << file_path_stream.rdbuf();
 }
 
 // Helper function to literally just save a file.orig back to the original file name
-void revertFilesFromOrig(std::string &file_path){
+void revertFilesFromOrig(std::string &file_path)
+{
     std::string orig_file_path = file_path + ".orig";
-    std::ifstream  orig_file_stream(orig_file_path,   std::ios::binary);
-    std::ofstream  file_path_stream(file_path, std::ios::binary);
+    std::ifstream orig_file_stream(orig_file_path, std::ios::binary);
+    std::ofstream file_path_stream(file_path, std::ios::binary);
     file_path_stream << orig_file_stream.rdbuf();
 }
 
@@ -69,16 +71,19 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
         std::string scs_output_path = output_path + ".scs";
         std::string scz_output_path = output_path + ".scz";
         std::string xml_output_path = output_path + ".xml";
-        std::ifstream  scs_orig_file(scs_output_path + ".orig" ,   std::ios::binary);
+        std::ifstream scs_orig_file(scs_output_path + ".orig", std::ios::binary);
 
         std::__fs::filesystem::remove_all(output_path);
 
-        if(scs_orig_file.good()){
+        if (scs_orig_file.good())
+        {
             // Start with a fresh copy on each instantiation fort he time being if an original file exists.
             revertFilesFromOrig(scs_output_path);
             revertFilesFromOrig(scz_output_path);
             revertFilesFromOrig(xml_output_path);
-        } else {
+        }
+        else
+        {
             // If the original file does not exists, copy the assumed baseline files to the ".orig" extension
             backupFiletoOrig(scs_output_path);
             backupFiletoOrig(scz_output_path);
@@ -91,20 +96,12 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
         //     recursiveDeleteDirectory(file_path_string);
         // }
 
-
         // Check if model SCZ and XML already exists
-        //auto scz_status = static_cast<std::string>(SC::Store::Database::QuerySCZ(scz_output_path.c_str(), logger));
+        // auto scz_status = static_cast<std::string>(SC::Store::Database::QuerySCZ(scz_output_path.c_str(), logger));
 
-        if(!std::__fs::filesystem::exists(output_path)){
-            SC::Store::Database::DecompressSCZ(scz_output_path.c_str(), output_path.c_str(), logger);
-        }
-
-        // Query existing models.
-        size_t count;
-        const char *const *names = cache.GetModelPaths(count);
-        for (size_t i = 0; i < count; ++i)
+        if (!std::__fs::filesystem::exists(output_path))
         {
-            printf("%u:\t%s\n", (unsigned int)i, names[i]);
+            SC::Store::Database::DecompressSCZ(scz_output_path.c_str(), output_path.c_str(), logger);
         }
 
         // Open (or Create) the model we care about.
@@ -112,23 +109,18 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
         auto modelName = model.GetName();
         printf("%s\n", modelName);
 
-        // These keys will get populated later in this function.
-        SC::Store::MeshKey mesh_key;
-        SC::Store::MaterialKey red_material_key;
-        SC::Store::MaterialKey green_material_key;
-        SC::Store::MaterialKey blue_material_key;
-        SC::Store::MatrixKey matrix_key;
-        SC::Store::InstanceKey instance_key_1;
-        SC::Store::InstanceKey instance_key_2;
-        SC::Store::InstanceKey instance_key_3;
-        SC::Store::InstanceKey instance_key_4;
         SC::Store::AssemblyTree assembly_tree(logger);
-
-        
         // Load/Author assembly tree.
         {
             if (assembly_tree.DeserializeFromXML(xml_output_path.c_str()))
             {
+
+                // assembly_tree.SetNodeName(0, "chris overwrite");
+                // // Add an attribute on that node.
+                // assembly_tree.AddAttribute(
+                //     34, "chris's attribute", SC::Store::AssemblyTree::AttributeTypeString,
+                //     "dope if this works");
+
                 ///// PROCESS JSON IMPORT
                 char *source = new char[json_input_string.length() + 1];
                 strcpy(source, json_input_string.c_str());
@@ -138,11 +130,16 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                 JsonValue value;
                 JsonAllocator allocator;
                 int status = jsonParse(source, &endptr, &value, allocator);
-                if (status != JSON_OK) {
+                if (status != JSON_OK)
+                {
                     fprintf(stderr, "%s at %zd\n", jsonStrError(status), endptr - source);
-                } else {          
-                    for (auto changeRequestItem : value) {
-                        if(strcmp(changeRequestItem->key, "attributes") == 0) {
+                }
+                else
+                {
+                    for (auto changeRequestItem : value)
+                    {
+                        if (strcmp(changeRequestItem->key, "attributes") == 0)
+                        {
                             /*"attributes":[
                                 {"nodeId":67,"Material":"Inconel"},
                                 {"nodeId":28,"Material":"Steel"},
@@ -150,70 +147,103 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                 {"nodeId":95,"Manufacture Date":"10/22/2021"}]
                             */
                             // The attributes will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
-                            for (auto attributes : changeRequestItem->value) {
+                            for (auto attributes : changeRequestItem->value)
+                            {
                                 auto attribute = attributes->value.toNode();
-                                //for(auto attribute: attributePair->value){
-                                    if(strcmp(attribute->key, "nodeId") == 0){
-                                        auto nodeId = attribute->value.toNumber();
-                                        auto attributeName = attribute->next->key;
-                                        auto attributeValue = attribute->next->value.toString();
-                                        assembly_tree.AddAttribute(nodeId, attributeName, SC::Store::AssemblyTree::AttributeTypeString, attributeValue);
+                                // for(auto attribute: attributePair->value){
+                                if (strcmp(attribute->key, "nodeId") == 0)
+                                {
+                                    auto nodeId = (int)attribute->value.toNumber();
+                                    auto attributeName = attribute->next->key;
+                                    auto attributeValue = attribute->next->value.toString();
+                                    if (!assembly_tree.AddAttribute(nodeId, attributeName, SC::Store::AssemblyTree::AttributeTypeString, attributeValue))
+                                    {
+                                        printf("ERROR: Failed to add attribute %s on node %i . \n", attributeName, nodeId);
                                     }
+                                }
                                 //}
                             }
-                        } else if(strcmp(changeRequestItem->key, "colors") == 0){
+                        }
+                        else if (strcmp(changeRequestItem->key, "colors") == 0)
+                        {
                             /*"colors":[{"nodeIds":[8,9,10,11],"color":{"r":255,"g":0,"b":0}}]}*/
                             int red, green, blue = 0;
 
                             // The colors will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
-                            for (auto colors : changeRequestItem->value) {
+                            for (auto colors : changeRequestItem->value)
+                            {
                                 auto colorNode = colors->value.toNode();
-                                if(strcmp(colorNode->key, "nodeIds") == 0){
-                                    auto color = colorNode->next;
-                                    if(strcmp(color->key, "color") == 0){
-                                        for(auto rgbValues : color->value){
-                                            if(strcmp(rgbValues->key, "r") == 0){
-                                                red = (int)rgbValues->value.toNumber();
-                                            } else if(strcmp(rgbValues->key, "g") == 0){
-                                                green = (int)rgbValues->value.toNumber();
-                                            } else if(strcmp(rgbValues->key, "b") == 0){
-                                                blue = (int)rgbValues->value.toNumber();
-                                            }
-                                        }
-                                    }
+                                if (strcmp(colorNode->key, "nodeIds") == 0)
+                                {
+                                    // auto color = colorNode->next;
+                                    // if (strcmp(color->key, "color") == 0)
+                                    // {
+                                    //     for (auto rgbValues : color->value)
+                                    //     {
+                                    //         if (strcmp(rgbValues->key, "r") == 0)
+                                    //         {
+                                    //             red = (int)rgbValues->value.toNumber();
+                                    //         }
+                                    //         else if (strcmp(rgbValues->key, "g") == 0)
+                                    //         {
+                                    //             green = (int)rgbValues->value.toNumber();
+                                    //         }
+                                    //         else if (strcmp(rgbValues->key, "b") == 0)
+                                    //         {
+                                    //             blue = (int)rgbValues->value.toNumber();
+                                    //         }
+                                    //     }
+                                    // }
 
-                                    if(colorNode->value.getTag() == JSON_ARRAY){
-                                        for(auto nodeIdsItem : colorNode->value){
-                                            //TODO publish color update.
-                                            auto nodeId = nodeIdsItem->value.toNumber();
-                                            auto material = SC::Store::Material(SC::Store::Color(red, green, blue, 1.0));
-                                            auto materialKey = model.Insert(material);
-                                            assembly_tree.SetNodeMaterial(nodeId, material);
-                                        }
-                                    }
-                                } else if(strcmp(colorNode->key, "nodeId") == 0){
+                                    // if (colorNode->value.getTag() == JSON_ARRAY)
+                                    // {
+                                    //     for (auto nodeIdsItem : colorNode->value)
+                                    //     {
+                                    //         // TODO publish color update.
+                                    //         auto nodeId = (int)nodeIdsItem->value.toNumber();
+                                    //         auto material = SC::Store::Material(SC::Store::Color(red, green, blue, 1.0));
+                                    //         auto materialKey = model.Insert(material);
+                                    //         if (!assembly_tree.SetNodeMaterial(nodeId, material))
+                                    //         {
+                                    //             printf("ERROR: Failed to set color on node %i . \n", nodeId);
+                                    //         }
+                                    //     }
+                                    // }
+                                }
+                                else if (strcmp(colorNode->key, "nodeId") == 0)
+                                {
                                     auto color = colorNode->next;
-                                    if(strcmp(color->key, "color") == 0){
-                                        for(auto rgbValues : color->value){
-                                            if(strcmp(rgbValues->key, "r") == 0){
-                                                red = (int)rgbValues->value.toNumber();
-                                            } else if(strcmp(rgbValues->key, "g") == 0){
-                                                green = (int)rgbValues->value.toNumber();
-                                            } else if(strcmp(rgbValues->key, "b") == 0){
-                                                blue = (int)rgbValues->value.toNumber();
+                                    if (strcmp(color->key, "color") == 0)
+                                    {
+                                        for (auto rgbValues : color->value)
+                                        {
+                                            if (strcmp(rgbValues->key, "r") == 0)
+                                            {
+                                                red = (rgbValues->value.toNumber())/255.0;
+                                            }
+                                            else if (strcmp(rgbValues->key, "g") == 0)
+                                            {
+                                                green = (rgbValues->value.toNumber())/255.0;
+                                            }
+                                            else if (strcmp(rgbValues->key, "b") == 0)
+                                            {
+                                                blue = (rgbValues->value.toNumber())/255.0;
                                             }
                                         }
                                     }
-                                    auto nodeId = colorNode->value.toNumber();
+                                    auto nodeId = (int)colorNode->value.toNumber();
                                     auto material = SC::Store::Material(SC::Store::Color(red, green, blue, 1.0));
                                     auto materialKey = model.Insert(material);
-                                    assembly_tree.SetNodeMaterial(nodeId, material);
-                                    //TODO: publish color updates
-
+                                    // if (!assembly_tree.SetNodeMaterial(13, material))
+                                    // {
+                                    //     printf("ERROR: Failed to set color on instance %i . \n", nodeId);
+                                    // } // TODO: publish color updates
+                                    model.Set((SC::Store::InstanceKey)13, materialKey,  materialKey, materialKey);
                                 }
                             }
-                            
-                        } else if(strcmp(changeRequestItem->key, "defaultCamera") == 0) {
+                        }
+                        else if (strcmp(changeRequestItem->key, "defaultCamera") == 0)
+                        {
                             SC::Store::Camera defaultCamera;
                             /*"defaultCamera":
                             {"_position":{"x":81.22082242242087,"y":-99.85364263567925,"z":-14.745490335642312},
@@ -225,79 +255,125 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                             "_nearLimit":0.01,
                             "_cameraFlags":0},
                             */
-                            for (auto cameraSettings : changeRequestItem->value) {
-                                if(strcmp(cameraSettings->key, "_position") == 0){
-                                    for(auto xyzVals: cameraSettings->value){
-                                        if(strcmp(xyzVals->key, "x") == 0){
+                            for (auto cameraSettings : changeRequestItem->value)
+                            {
+                                if (strcmp(cameraSettings->key, "_position") == 0)
+                                {
+                                    for (auto xyzVals : cameraSettings->value)
+                                    {
+                                        if (strcmp(xyzVals->key, "x") == 0)
+                                        {
                                             defaultCamera.position.x = xyzVals->value.toNumber();
-                                        } else if(strcmp(xyzVals->key, "y") == 0){
+                                        }
+                                        else if (strcmp(xyzVals->key, "y") == 0)
+                                        {
                                             defaultCamera.position.y = xyzVals->value.toNumber();
-                                        } else if(strcmp(xyzVals->key, "z") == 0){
+                                        }
+                                        else if (strcmp(xyzVals->key, "z") == 0)
+                                        {
                                             defaultCamera.position.z = xyzVals->value.toNumber();
                                         }
                                     }
-                                } else if(strcmp(cameraSettings->key, "_target") == 0){
+                                }
+                                else if (strcmp(cameraSettings->key, "_target") == 0)
+                                {
                                     double xTarget, yTarget, zTarget = 0.0;
-                                    for(auto xyzVals: cameraSettings->value){
-                                        if(strcmp(xyzVals->key, "x") == 0){
+                                    for (auto xyzVals : cameraSettings->value)
+                                    {
+                                        if (strcmp(xyzVals->key, "x") == 0)
+                                        {
                                             defaultCamera.target.x = xyzVals->value.toNumber();
-                                        } else if(strcmp(xyzVals->key, "y") == 0){
+                                        }
+                                        else if (strcmp(xyzVals->key, "y") == 0)
+                                        {
                                             defaultCamera.target.y = xyzVals->value.toNumber();
-                                        } else if(strcmp(xyzVals->key, "z") == 0){
+                                        }
+                                        else if (strcmp(xyzVals->key, "z") == 0)
+                                        {
                                             defaultCamera.target.z = xyzVals->value.toNumber();
                                         }
                                     }
-                                } else if(strcmp(cameraSettings->key, "_up") == 0){
-                                    for(auto xyzVals: cameraSettings->value){
-                                        if(strcmp(xyzVals->key, "x") == 0){
+                                }
+                                else if (strcmp(cameraSettings->key, "_up") == 0)
+                                {
+                                    for (auto xyzVals : cameraSettings->value)
+                                    {
+                                        if (strcmp(xyzVals->key, "x") == 0)
+                                        {
                                             defaultCamera.up_vector.x = xyzVals->value.toNumber();
-                                        } else if(strcmp(xyzVals->key, "y") == 0){
+                                        }
+                                        else if (strcmp(xyzVals->key, "y") == 0)
+                                        {
                                             defaultCamera.up_vector.y = xyzVals->value.toNumber();
-                                        } else if(strcmp(xyzVals->key, "z") == 0){
+                                        }
+                                        else if (strcmp(xyzVals->key, "z") == 0)
+                                        {
                                             defaultCamera.up_vector.z = xyzVals->value.toNumber();
                                         }
                                     }
-                                } else if(strcmp(cameraSettings->key, "_width") == 0){
+                                }
+                                else if (strcmp(cameraSettings->key, "_width") == 0)
+                                {
                                     defaultCamera.field_width = cameraSettings->value.toNumber();
-                                } else if(strcmp(cameraSettings->key, "_height") == 0){
+                                }
+                                else if (strcmp(cameraSettings->key, "_height") == 0)
+                                {
                                     defaultCamera.field_height = cameraSettings->value.toNumber();
-                                } else if(strcmp(cameraSettings->key, "_projection") == 0){
-                                    defaultCamera.projection = (SC::Store::Camera::Projection)cameraSettings->value.toNumber();
-                                } else if(strcmp(cameraSettings->key, "_nearLimit") == 0){
-                                    //defaultCamera.nearLimit = cameraSettings->value.toNumber();
-                                } else if(strcmp(cameraSettings->key, "_cameraFlags") == 0){
-                                    //cameraFlags = (int)cameraSettings->value.toNumber();
+                                }
+                                else if (strcmp(cameraSettings->key, "_projection") == 0)
+                                {
+                                    auto clientProjectionEnum = (int)cameraSettings->value.toNumber();
+                                    auto libScProjectionEnum = SC::Store::Camera::Projection::Invalid;
+                                    // {0: 'Orthographic', 1: 'Perspective', Orthographic: 0, Perspective: 1}
+                                    if (clientProjectionEnum == 0) {
+                                        libScProjectionEnum = SC::Store::Camera::Projection::Orthographic;
+                                    }
+                                    if (clientProjectionEnum == 1) { 
+                                        libScProjectionEnum = SC::Store::Camera::Projection::Perspective;
+                                    }
+                                    defaultCamera.projection = libScProjectionEnum;
+                                }
+                                else if (strcmp(cameraSettings->key, "_nearLimit") == 0)
+                                {
+                                    // defaultCamera.nearLimit = cameraSettings->value.toNumber();
+                                }
+                                else if (strcmp(cameraSettings->key, "_cameraFlags") == 0)
+                                {
+                                    // cameraFlags = (int)cameraSettings->value.toNumber();
                                 }
                             }
-                            //TODO: Write the default camera settings to the file.
+                            // TODO: Write the default camera settings to the file.
                             model.Set(defaultCamera);
-                        } else {
+                            
+                        }
+                        else
+                        {
                             // Unhandled JSON top level item
                             printf("ERROR: Unknown change insertion in JSON file\n");
                         }
                     }
                 }
 
-                delete [] source;
+                delete[] source;
 
-                //printf("%s\n", json_update.c_str());
-                /////// END JSON IMPORT
-
+                printf("%s\n", json_update.c_str());
+                ///// END JSON IMPORT
 
                 // Serialize authored content to model and xml output
-                assembly_tree.SerializeToXML(xml_output_path.c_str());
-                assembly_tree.SerializeToModel(model);
+                auto passed = assembly_tree.SerializeToModel(model);
+                passed = assembly_tree.SerializeToXML(xml_output_path.c_str());
+
+                // Prepare the model for streaming.
+                model.PrepareStream();
+
                 model.GenerateSCSFile(scs_output_path.c_str());
                 model.GenerateSCZFile(scz_output_path.c_str());
             }
             else
             {
-                printf("Could not load XML. Assembly Tree Major Version must be lower than: %u\n", SC::Store::AssemblyTree::MAJOR_VERSION);
+                printf("Could not load XML. Assembly Tree Major Version must be >= %u\n", SC::Store::AssemblyTree::MAJOR_VERSION);
             }
         }
-
-        // Prepare the model for streaming.
-        model.PrepareStream();
     }
     catch (std::exception const &e)
     {
