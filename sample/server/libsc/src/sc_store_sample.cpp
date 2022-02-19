@@ -1,6 +1,9 @@
 
 #include <assert.h>
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <unistd.h>
 
 #include "hoops_license.h"
 #include "sc_store.h"
@@ -31,6 +34,22 @@ public:
     }
 };
 
+// Helper function to literally just save a file copy to file.orig
+void backupFiletoOrig(std::string &file_path){
+    std::string orig_file_path = file_path + ".orig";
+    std::ofstream  orig_file_stream(orig_file_path,   std::ios::binary);
+    std::ifstream  file_path_stream(file_path, std::ios::binary);
+    orig_file_stream << file_path_stream.rdbuf();
+}
+
+// Helper function to literally just save a file.orig back to the original file name
+void revertFilesFromOrig(std::string &file_path){
+    std::string orig_file_path = file_path + ".orig";
+    std::ifstream  orig_file_stream(orig_file_path,   std::ios::binary);
+    std::ofstream  file_path_stream(file_path, std::ios::binary);
+    file_path_stream << orig_file_stream.rdbuf();
+}
+
 int StoreSample(const std::string &model_output_path, const std::string &model_name = "sc-model-default", const std::string &json_update = "")
 {
     std::string json_input_string = json_update;
@@ -40,15 +59,31 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
 
     try
     {
-        // Open the cache.
+        // Open the cache and clean up files that we are using.
         SC::Store::Database::SetLicense(HOOPS_LICENSE);
         SC::Store::Cache cache = SC::Store::Database::Open(logger);
 
         std::string output_path = model_output_path;
         output_path += "/";
         output_path += model_name;
+        std::string scs_output_path = output_path + ".scs";
         std::string scz_output_path = output_path + ".scz";
         std::string xml_output_path = output_path + ".xml";
+        std::ifstream  scs_orig_file(scs_output_path + ".orig" ,   std::ios::binary);
+
+        std::__fs::filesystem::remove_all(output_path);
+
+        if(scs_orig_file.good()){
+            // Start with a fresh copy on each instantiation fort he time being if an original file exists.
+            revertFilesFromOrig(scs_output_path);
+            revertFilesFromOrig(scz_output_path);
+            revertFilesFromOrig(xml_output_path);
+        } else {
+            // If the original file does not exists, copy the assumed baseline files to the ".orig" extension
+            backupFiletoOrig(scs_output_path);
+            backupFiletoOrig(scz_output_path);
+            backupFiletoOrig(xml_output_path);
+        }
 
         // // Does the model in question exist?
         // if (cache.Exists(file_path_string.c_str())) {
@@ -149,6 +184,9 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                         for(auto nodeIdsItem : colorNode->value){
                                             //TODO publish color update.
                                             auto nodeId = nodeIdsItem->value.toNumber();
+                                            auto material = SC::Store::Material(SC::Store::Color(red, green, blue, 1.0));
+                                            auto materialKey = model.Insert(material);
+                                            assembly_tree.SetNodeMaterial(nodeId, material);
                                         }
                                     }
                                 } else if(strcmp(colorNode->key, "nodeId") == 0){
@@ -165,7 +203,11 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                         }
                                     }
                                     auto nodeId = colorNode->value.toNumber();
+                                    auto material = SC::Store::Material(SC::Store::Color(red, green, blue, 1.0));
+                                    auto materialKey = model.Insert(material);
+                                    assembly_tree.SetNodeMaterial(nodeId, material);
                                     //TODO: publish color updates
+
                                 }
                             }
                             
@@ -243,6 +285,8 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                 // Serialize authored content to model and xml output
                 assembly_tree.SerializeToXML(xml_output_path.c_str());
                 assembly_tree.SerializeToModel(model);
+                model.GenerateSCSFile(scs_output_path.c_str());
+                model.GenerateSCZFile(scz_output_path.c_str());
             }
             else
             {
