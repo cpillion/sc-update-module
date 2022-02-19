@@ -5,6 +5,7 @@
 #include "hoops_license.h"
 #include "sc_store.h"
 #include "sc_assemblytree.h"
+#include <gason.h>
 
 #if 0
 #include "tc_io.h"
@@ -30,8 +31,10 @@ public:
     }
 };
 
-int StoreSample(const std::string &model_output_path, const std::string &model_name = "sc-model-default")
+int StoreSample(const std::string &model_output_path, const std::string &model_name = "sc-model-default", const std::string &json_update = "")
 {
+    std::string json_input_string = json_update;
+    json_input_string.erase(std::remove_if(json_input_string.begin(), json_input_string.end(), isspace), json_input_string.end());
 
     ApplicationLogger logger;
 
@@ -84,15 +87,158 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
         SC::Store::InstanceKey instance_key_4;
         SC::Store::AssemblyTree assembly_tree(logger);
 
+        
         // Load/Author assembly tree.
         {
             if (assembly_tree.DeserializeFromXML(xml_output_path.c_str()))
             {
-                assembly_tree.SetNodeName(0, "chris overwrite");
-                // Add an attribute on that node.
-                assembly_tree.AddAttribute(
-                    0, "chris's attribute", SC::Store::AssemblyTree::AttributeTypeString,
-                    "dope if this works");
+                ///// PROCESS JSON IMPORT
+                char *source = new char[json_input_string.length() + 1];
+                strcpy(source, json_input_string.c_str());
+
+                // do not forget terminate source string with 0
+                char *endptr;
+                JsonValue value;
+                JsonAllocator allocator;
+                int status = jsonParse(source, &endptr, &value, allocator);
+                if (status != JSON_OK) {
+                    fprintf(stderr, "%s at %zd\n", jsonStrError(status), endptr - source);
+                } else {          
+                    for (auto changeRequestItem : value) {
+                        if(strcmp(changeRequestItem->key, "attributes") == 0) {
+                            /*"attributes":[
+                                {"nodeId":67,"Material":"Inconel"},
+                                {"nodeId":28,"Material":"Steel"},
+                                {"nodeId":59,"Material":"Wood"},
+                                {"nodeId":95,"Manufacture Date":"10/22/2021"}]
+                            */
+                            // The attributes will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
+                            for (auto attributes : changeRequestItem->value) {
+                                auto attribute = attributes->value.toNode();
+                                //for(auto attribute: attributePair->value){
+                                    if(strcmp(attribute->key, "nodeId") == 0){
+                                        auto nodeId = attribute->value.toNumber();
+                                        auto attributeName = attribute->next->key;
+                                        auto attributeValue = attribute->next->value.toString();
+                                        assembly_tree.AddAttribute(nodeId, attributeName, SC::Store::AssemblyTree::AttributeTypeString, attributeValue);
+                                    }
+                                //}
+                            }
+                        } else if(strcmp(changeRequestItem->key, "colors") == 0){
+                            /*"colors":[{"nodeIds":[8,9,10,11],"color":{"r":255,"g":0,"b":0}}]}*/
+                            int red, green, blue = 0;
+
+                            // The colors will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
+                            for (auto colors : changeRequestItem->value) {
+                                auto colorNode = colors->value.toNode();
+                                if(strcmp(colorNode->key, "nodeIds") == 0){
+                                    auto color = colorNode->next;
+                                    if(strcmp(color->key, "color") == 0){
+                                        for(auto rgbValues : color->value){
+                                            if(strcmp(rgbValues->key, "r") == 0){
+                                                red = (int)rgbValues->value.toNumber();
+                                            } else if(strcmp(rgbValues->key, "g") == 0){
+                                                green = (int)rgbValues->value.toNumber();
+                                            } else if(strcmp(rgbValues->key, "b") == 0){
+                                                blue = (int)rgbValues->value.toNumber();
+                                            }
+                                        }
+                                    }
+
+                                    if(colorNode->value.getTag() == JSON_ARRAY){
+                                        for(auto nodeIdsItem : colorNode->value){
+                                            //TODO publish color update.
+                                            auto nodeId = nodeIdsItem->value.toNumber();
+                                        }
+                                    }
+                                } else if(strcmp(colorNode->key, "nodeId") == 0){
+                                    auto color = colorNode->next;
+                                    if(strcmp(color->key, "color") == 0){
+                                        for(auto rgbValues : color->value){
+                                            if(strcmp(rgbValues->key, "r") == 0){
+                                                red = (int)rgbValues->value.toNumber();
+                                            } else if(strcmp(rgbValues->key, "g") == 0){
+                                                green = (int)rgbValues->value.toNumber();
+                                            } else if(strcmp(rgbValues->key, "b") == 0){
+                                                blue = (int)rgbValues->value.toNumber();
+                                            }
+                                        }
+                                    }
+                                    auto nodeId = colorNode->value.toNumber();
+                                    //TODO: publish color updates
+                                }
+                            }
+                            
+                        } else if(strcmp(changeRequestItem->key, "defaultCamera") == 0) {
+                            SC::Store::Camera defaultCamera;
+                            /*"defaultCamera":
+                            {"_position":{"x":81.22082242242087,"y":-99.85364263567925,"z":-14.745490335642312},
+                            "_target":{"x":42.01403360616819,"y":28.500000953674316,"z":-45.15500047683717},
+                            "_up":{"x":0.014413796198195017,"y":0.23468066183916042,"z":0.9719656523961587},
+                            "_width":137.61020125980392,
+                            "_height":137.61020125980392,
+                            "_projection":0,
+                            "_nearLimit":0.01,
+                            "_cameraFlags":0},
+                            */
+                            for (auto cameraSettings : changeRequestItem->value) {
+                                if(strcmp(cameraSettings->key, "_position") == 0){
+                                    for(auto xyzVals: cameraSettings->value){
+                                        if(strcmp(xyzVals->key, "x") == 0){
+                                            defaultCamera.position.x = xyzVals->value.toNumber();
+                                        } else if(strcmp(xyzVals->key, "y") == 0){
+                                            defaultCamera.position.y = xyzVals->value.toNumber();
+                                        } else if(strcmp(xyzVals->key, "z") == 0){
+                                            defaultCamera.position.z = xyzVals->value.toNumber();
+                                        }
+                                    }
+                                } else if(strcmp(cameraSettings->key, "_target") == 0){
+                                    double xTarget, yTarget, zTarget = 0.0;
+                                    for(auto xyzVals: cameraSettings->value){
+                                        if(strcmp(xyzVals->key, "x") == 0){
+                                            defaultCamera.target.x = xyzVals->value.toNumber();
+                                        } else if(strcmp(xyzVals->key, "y") == 0){
+                                            defaultCamera.target.y = xyzVals->value.toNumber();
+                                        } else if(strcmp(xyzVals->key, "z") == 0){
+                                            defaultCamera.target.z = xyzVals->value.toNumber();
+                                        }
+                                    }
+                                } else if(strcmp(cameraSettings->key, "_up") == 0){
+                                    for(auto xyzVals: cameraSettings->value){
+                                        if(strcmp(xyzVals->key, "x") == 0){
+                                            defaultCamera.up_vector.x = xyzVals->value.toNumber();
+                                        } else if(strcmp(xyzVals->key, "y") == 0){
+                                            defaultCamera.up_vector.y = xyzVals->value.toNumber();
+                                        } else if(strcmp(xyzVals->key, "z") == 0){
+                                            defaultCamera.up_vector.z = xyzVals->value.toNumber();
+                                        }
+                                    }
+                                } else if(strcmp(cameraSettings->key, "_width") == 0){
+                                    defaultCamera.field_width = cameraSettings->value.toNumber();
+                                } else if(strcmp(cameraSettings->key, "_height") == 0){
+                                    defaultCamera.field_height = cameraSettings->value.toNumber();
+                                } else if(strcmp(cameraSettings->key, "_projection") == 0){
+                                    defaultCamera.projection = (SC::Store::Camera::Projection)cameraSettings->value.toNumber();
+                                } else if(strcmp(cameraSettings->key, "_nearLimit") == 0){
+                                    //defaultCamera.nearLimit = cameraSettings->value.toNumber();
+                                } else if(strcmp(cameraSettings->key, "_cameraFlags") == 0){
+                                    //cameraFlags = (int)cameraSettings->value.toNumber();
+                                }
+                            }
+                            //TODO: Write the default camera settings to the file.
+                            model.Set(defaultCamera);
+                        } else {
+                            // Unhandled JSON top level item
+                            printf("ERROR: Unknown change insertion in JSON file\n");
+                        }
+                    }
+                }
+
+                delete [] source;
+
+                //printf("%s\n", json_update.c_str());
+                /////// END JSON IMPORT
+
 
                 // Serialize authored content to model and xml output
                 assembly_tree.SerializeToXML(xml_output_path.c_str());
