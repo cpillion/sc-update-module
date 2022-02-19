@@ -95,7 +95,9 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
         // Check if model SCZ and XML already exists
         //auto scz_status = static_cast<std::string>(SC::Store::Database::QuerySCZ(scz_output_path.c_str(), logger));
 
-        SC::Store::Database::DecompressSCZ(scz_output_path.c_str(), output_path.c_str(), logger);
+        if(!std::__fs::filesystem::exists(output_path)){
+            SC::Store::Database::DecompressSCZ(scz_output_path.c_str(), output_path.c_str(), logger);
+        }
 
         // Query existing models.
         size_t count;
