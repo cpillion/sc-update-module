@@ -11,11 +11,15 @@ export default class UIToolbar extends React.Component {
   addNodeProperties() {
     let hwv = this.props.viewer;
     let selectionResults = hwv.selectionManager.getResults();
-    // Start with one selection. TODO: add support from multiple selections
-    let nodeId;
     if (selectionResults.length === 0) {
-      alert('Please first select the nodes you would like to add properties for');
-    } else {
+        alert('Please first select the nodes you would like to add properties for');
+      } 
+    // Start with one selection. TODO: add support from multiple selections
+    let nodeId = selectionResults[0].getNodeId();
+    if (hwv.model.getNodeType(nodeId) === Communicator.NodeType.BodyInstance) {
+        alert("Error: Cannot write attributes to a body instance!")
+    }
+    else {
       // Todo: Create modal, form, etc to collect this data. Using prompt for now.
       let propertyName = prompt('Enter the property name: ', 'Material');
       let propertyValue = prompt(`Enter the value for the ${propertyName} property: `, '');
