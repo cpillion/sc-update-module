@@ -259,7 +259,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                             */
                             for (auto cameraSettings : changeRequestItem->value)
                             {
-                                if (strcmp(cameraSettings->key, "_position") == 0)
+                                if (strcmp(cameraSettings->key, "position") == 0)
                                 {
                                     for (auto xyzVals : cameraSettings->value)
                                     {
@@ -277,7 +277,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                         }
                                     }
                                 }
-                                else if (strcmp(cameraSettings->key, "_target") == 0)
+                                else if (strcmp(cameraSettings->key, "target") == 0)
                                 {
                                     double xTarget, yTarget, zTarget = 0.0;
                                     for (auto xyzVals : cameraSettings->value)
@@ -296,7 +296,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                         }
                                     }
                                 }
-                                else if (strcmp(cameraSettings->key, "_up") == 0)
+                                else if (strcmp(cameraSettings->key, "up") == 0)
                                 {
                                     for (auto xyzVals : cameraSettings->value)
                                     {
@@ -314,15 +314,15 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                         }
                                     }
                                 }
-                                else if (strcmp(cameraSettings->key, "_width") == 0)
+                                else if (strcmp(cameraSettings->key, "width") == 0)
                                 {
                                     defaultCamera.field_width = cameraSettings->value.toNumber();
                                 }
-                                else if (strcmp(cameraSettings->key, "_height") == 0)
+                                else if (strcmp(cameraSettings->key, "height") == 0)
                                 {
                                     defaultCamera.field_height = cameraSettings->value.toNumber();
                                 }
-                                else if (strcmp(cameraSettings->key, "_projection") == 0)
+                                else if (strcmp(cameraSettings->key, "projection") == 0)
                                 {
                                     auto clientProjectionEnum = (int)cameraSettings->value.toNumber();
                                     auto libScProjectionEnum = SC::Store::Camera::Projection::Invalid;
@@ -335,11 +335,11 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                     }
                                     defaultCamera.projection = libScProjectionEnum;
                                 }
-                                else if (strcmp(cameraSettings->key, "_nearLimit") == 0)
+                                else if (strcmp(cameraSettings->key, "nearLimit") == 0)
                                 {
                                     // defaultCamera.nearLimit = cameraSettings->value.toNumber();
                                 }
-                                else if (strcmp(cameraSettings->key, "_cameraFlags") == 0)
+                                else if (strcmp(cameraSettings->key, "cameraFlags") == 0)
                                 {
                                     // cameraFlags = (int)cameraSettings->value.toNumber();
                                 }

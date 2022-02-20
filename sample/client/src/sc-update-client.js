@@ -2,7 +2,7 @@ import io from 'socket.io-client';
 
 export default class scUpdate {
   constructor(libScServerEndpoint) {
-    this.scChanges = { attributes: [], defaultCamera: null, colors: [] };
+    this.scChanges = {  };
     this.socket = io(libScServerEndpoint, { transports: ['websocket'] });
 
     // Socket.io error info for debugging
@@ -17,6 +17,9 @@ export default class scUpdate {
       nodeId: nodeId,
     };
     let updateInfo = Object.assign(nodeInfo, nodeAttributes);
+    if (!this.scChanges.hasOwnProperty("attributes")) {
+        this.scChanges.attributes = [];
+    }
     this.scChanges.attributes.push(updateInfo);
   }
 
@@ -24,8 +27,10 @@ export default class scUpdate {
     this.scChanges.defaultCamera = camera;
   }
 
-  // Will need to update this for using something like a color map in HC
   updateColors(colorMap) {
+    if (!this.scChanges.hasOwnProperty("colors")) {
+        this.scChanges.colors = [];
+    }
     colorMap.forEach((value, key) => {
       let nodeInfo = {
         nodeId: key,
@@ -36,7 +41,7 @@ export default class scUpdate {
   }
 
   updateMeshes(nodeId, parentNodeId, meshData) {
-      // Need to parse meshdatacopy and put into JSON. BLAH!
+      // Need to parse meshdatacopy and put into JSON. 
   }
 
   sendToLibSc() {

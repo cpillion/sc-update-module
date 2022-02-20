@@ -24,7 +24,7 @@ io.on('connection', (socket) => {
     console.log(libSCdataJSON)
     const child = execFile(
       path.join(__dirname, 'libsc/outputs/libsc_sample'),
-      [path.join(__dirname, 'libsc/outputs/modelCache'), 'microengine', `"${libSCdataJSON}"`],
+      [path.join(__dirname, 'libsc/outputs/modelCache'), 'microengine', libSCdataJSON],
       {
         env: { LD_LIBRARY_PATH: path.join(__dirname, '/libsc/bin/macos/') },
       },

@@ -32,7 +32,7 @@ export default class UIToolbar extends React.Component {
 
   setDefaultView() {
     let camera = this.props.viewer.view.getCamera();
-    this.scUpdate.updateDefaultCameraView(camera);
+    this.scUpdate.updateDefaultCameraView(camera.toJson());
     this.scUpdate.sendToLibSc();
   }
 
