@@ -1,11 +1,10 @@
 import React from 'react';
 import Communicator from 'communicator';
-import scUpdate from './sc-update-client';
 
 export default class UIToolbar extends React.Component {
-  constructor() {
-    super();
-    this.scUpdate = new scUpdate('http://localhost:5000');
+  constructor(props) {
+    super(props);
+    this.scUpdate = this.props.scUpdate;
     this.colorInput = undefined;
   }
 
@@ -63,12 +62,12 @@ export default class UIToolbar extends React.Component {
     const cubeMeshId = await hwv.model.createMesh(cubeMeshData);
     let meshInstanceData = new Communicator.MeshInstanceData(cubeMeshId);
     const nodeId = await hwv.model.createMeshInstance(meshInstanceData);
-    scUpdate.updateMeshs(
+    this.scUpdate.updateMeshs(
       nodeId,
       hwv.model.getNodeParent(nodeId),
       hwv.model.getNodeMeshData(nodeId)
     );
-    scUpdate.sendToLibSc();
+    this.scUpdate.sendToLibSc();
   }
 
   createCubeMeshData(size) {
@@ -157,17 +156,7 @@ export default class UIToolbar extends React.Component {
 
   render() {
     return (
-      <>
-        <button
-          id="home-button"
-          onClick={() => {
-            this.props.viewer.view
-              .resetCamera(750)
-              .then(() => this.props.viewer.view.fitWorld(750));
-          }}
-        >
-          Home
-        </button>
+      <div id="uiToolbar" className='uiToolbar'>
         <button
           id="add-property-button"
           onClick={() => {
@@ -202,14 +191,14 @@ export default class UIToolbar extends React.Component {
         </button>
           <input
             type="color"
-            id="body"
-            name="body"
+            id="colorpicker"
+            name="colorpicker"
             value="#f6b73c"
             onChange={(e) => {
               this.colorInput = e.target.value;
             }}
           />
-      </>
+      </div>
     );
   }
 }

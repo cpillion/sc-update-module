@@ -1,25 +1,29 @@
 .App {
   /*text-align: center;*/
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  /* width: 100vw; */
 }
 
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
-  height: 15vmin;
+  height: 4vmin;
   pointer-events: none;
 }
 
+.App-logo-name {
+  height: 5vmin;
+}
+
 .App-header {
-  background-color: #282c34;
-  min-height: 20vh;
+  background-color: #000000;
+  min-height: 15vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(5px + 2vmin);
   color: white;
-  height: 20vh;
+  height: 16vh;
 }
 
 .App-link {
@@ -37,16 +41,24 @@
 
 #hoops-container {
   position: relative;
-  width: 100%;
-  height: 77vh;
+  width: 45vw;
+  height: 100%;
+  float:left;
+}
+
+#scUpdateContainer {
+  position: relative;
+  background-color: lightslategray;
+  padding: 3vh;
+  height: 78vh;
 }
 
 #canvas {
   position: relative;
-  width: 50%;
+  width: 100%;
   height: 90%;
-  border: gray 1px solid;
-  margin: 2%
+  border: black 2px solid;
+  border-radius: 5px;
 }
 
 #root {
@@ -60,7 +72,54 @@ html, body {
 }
 
 #viewerTools {
-  position: absolute;
-  left: 48%;
-  height: 1vh;
+  position: relative;
+  /* left: 48%; */
+  /* margin: 1vh; */
+  /* height: 1vh; */
+  float: right;
+}
+
+.uiToolbar  {
+  margin: 2vh;
+}
+
+.uiToolbar button {
+  margin: 0.5vh;
+  border-radius: 5px;
+  font: x-small Inconsolata, monospace;
+  height: 3vh;
+}
+
+.uiToolbar input {
+  margin: 0.5vh;
+  border-radius: 5px;
+  height: 3vh;
+  vertical-align: middle;
+}
+
+.terminal {
+  background-color: black;
+  background-image: radial-gradient(
+    rgba(0, 150, 0, 0.75), black 120%
+  );
+  height: 25vh;
+  width: 45vw;
+  color: white;
+  font: small Inconsolata, monospace;
+  text-shadow: 0 0 5px #C8C8C8;
+  /* float: right; */
+  padding: 3vh;
+  position: relative;
+  border-radius: 5px;
+  overflow-y: scroll;
+  overflow-x: scroll;
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+}
+
+
+::-webkit-scrollbar {
+    width: 0;  /* Remove scrollbar space */
+    background: transparent;  /* Optional: just make scrollbar invisible */
 }
