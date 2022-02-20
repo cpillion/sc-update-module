@@ -6,20 +6,20 @@ export default class UIToolbar extends React.Component {
   constructor() {
     super();
     this.scUpdate = new scUpdate('http://localhost:5000');
+    this.colorInput = undefined;
   }
 
   addNodeProperties() {
     let hwv = this.props.viewer;
     let selectionResults = hwv.selectionManager.getResults();
     if (selectionResults.length === 0) {
-        alert('Please first select the nodes you would like to add properties for');
-      } 
+      alert('Please first select the nodes you would like to add properties for');
+    }
     // Start with one selection. TODO: add support from multiple selections
     let nodeId = selectionResults[0].getNodeId();
     if (hwv.model.getNodeType(nodeId) === Communicator.NodeType.BodyInstance) {
-        alert("Error: Cannot write attributes to a body instance!")
-    }
-    else {
+      alert('Error: Cannot write attributes to a body instance!');
+    } else {
       // Todo: Create modal, form, etc to collect this data. Using prompt for now.
       let propertyName = prompt('Enter the property name: ', 'Material');
       let propertyValue = prompt(`Enter the value for the ${propertyName} property: `, '');
@@ -37,14 +37,23 @@ export default class UIToolbar extends React.Component {
   }
 
   updateModelColors() {
-    let nodeIds = [8, 9, 10, 11]; // Screws nodeIds
-    let color = new Communicator.Color.green();
+    let hwv = this.props.viewer;
+    let selectionResults = hwv.selectionManager.getResults();
+    if (selectionResults.length === 0) {
+      alert('Please first select the nodes you would like to change color');
+    }
+    let nodeIds = selectionResults.map((selectionItem) => selectionItem.getNodeId());
+    let rgbColor = this.hexToRgb(this.colorInput);
+    let color = new Communicator.Color(rgbColor.r, rgbColor.g, rgbColor.b);
     let colorMap = new Map();
+    let scInstanceIdsMap = new Map();
     for (let nodeId of nodeIds) {
       colorMap.set(nodeId, color);
+      //if (hwv.model.getNodeType(nodeId) )
+      scInstanceIdsMap.set(nodeId, hwv.model.getSCInstanceKey(nodeId));
     }
     this.props.viewer.model.setNodesColors(colorMap);
-    this.scUpdate.updateColors(colorMap);
+    this.scUpdate.updateColors(colorMap, scInstanceIdsMap);
     this.scUpdate.sendToLibSc();
   }
 
@@ -137,6 +146,15 @@ export default class UIToolbar extends React.Component {
     return cubeMeshData;
   }
 
+  hexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null;
+  }
+
   render() {
     return (
       <>
@@ -182,6 +200,15 @@ export default class UIToolbar extends React.Component {
         >
           Insert and Author Sample Mesh
         </button>
+          <input
+            type="color"
+            id="body"
+            name="body"
+            value="#f6b73c"
+            onChange={(e) => {
+              this.colorInput = e.target.value;
+            }}
+          />
       </>
     );
   }

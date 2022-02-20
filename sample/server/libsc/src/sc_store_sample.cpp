@@ -124,6 +124,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                 ///// PROCESS JSON IMPORT
                 char *source = new char[json_input_string.length() + 1];
                 strcpy(source, json_input_string.c_str());
+                // strcpy(source, "{\"colors\":[{\"nodeId\":20,\"color\":{\"r\":229,\"g\":158,\"b\":16},\"scInstanceId\":1}]}");
 
                 // do not forget terminate source string with 0
                 char *endptr;
@@ -168,7 +169,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                         else if (strcmp(changeRequestItem->key, "colors") == 0)
                         {
                             /*"colors":[{"nodeIds":[8,9,10,11],"color":{"r":255,"g":0,"b":0}}]}*/
-                            int red, green, blue = 0;
+                            float red, green, blue = 0.0;
 
                             // The colors will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
                             for (auto colors : changeRequestItem->value)
@@ -220,27 +221,36 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                         {
                                             if (strcmp(rgbValues->key, "r") == 0)
                                             {
-                                                red = (rgbValues->value.toNumber())/255.0;
+                                                red = (rgbValues->value.toNumber()) / 255.0;
                                             }
                                             else if (strcmp(rgbValues->key, "g") == 0)
                                             {
-                                                green = (rgbValues->value.toNumber())/255.0;
+                                                green = (rgbValues->value.toNumber()) / 255.0;
                                             }
                                             else if (strcmp(rgbValues->key, "b") == 0)
                                             {
-                                                blue = (rgbValues->value.toNumber())/255.0;
+                                                blue = (rgbValues->value.toNumber()) / 255.0;
                                             }
                                         }
                                     }
+                                    SC::Store::InstanceKey scInstanceKey;
+                                    auto scInstanceId = color->next;
+                                    if (strcmp(scInstanceId->key, "scInstanceId") == 0)
+                                    {
+                                        scInstanceKey = scInstanceId->value.toNumber();
+                                    }
+
                                     auto nodeId = (int)colorNode->value.toNumber();
-                                    auto material = SC::Store::Material(SC::Store::Color(red, green, blue, 1.0));
-                                    auto materialKey = model.Insert(material);
+                                    auto inputMaterial = SC::Store::Material(SC::Store::Color(red, green, blue, 1.0));
+                                    auto inputMaterialKey = model.Insert(inputMaterial);
+                                    auto materialBlack = SC::Store::Material(SC::Store::Color(0, 0, 0, 1.0));
+                                    auto materialKeyBlack = model.Insert(materialBlack);
                                     // if (!assembly_tree.SetNodeMaterial(13, material))
                                     // {
                                     //     printf("ERROR: Failed to set color on instance %i . \n", nodeId);
                                     // } // TODO: publish color updates
-                                    // Need to send over scInstanceId from client. Passing 13 for now. 
-                                    model.Set((SC::Store::InstanceKey)13, materialKey,  materialKey, materialKey);
+                                    // Need to send over scInstanceId from client. Passing 13 for now.
+                                    model.Set(scInstanceKey, inputMaterialKey, materialKeyBlack, materialKeyBlack);
                                 }
                             }
                         }
@@ -327,10 +337,12 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                     auto clientProjectionEnum = (int)cameraSettings->value.toNumber();
                                     auto libScProjectionEnum = SC::Store::Camera::Projection::Invalid;
                                     // {0: 'Orthographic', 1: 'Perspective', Orthographic: 0, Perspective: 1}
-                                    if (clientProjectionEnum == 0) {
+                                    if (clientProjectionEnum == 0)
+                                    {
                                         libScProjectionEnum = SC::Store::Camera::Projection::Orthographic;
                                     }
-                                    if (clientProjectionEnum == 1) { 
+                                    if (clientProjectionEnum == 1)
+                                    {
                                         libScProjectionEnum = SC::Store::Camera::Projection::Perspective;
                                     }
                                     defaultCamera.projection = libScProjectionEnum;
@@ -346,7 +358,6 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                             }
                             // TODO: Write the default camera settings to the file.
                             model.Set(defaultCamera);
-                            
                         }
                         else
                         {
