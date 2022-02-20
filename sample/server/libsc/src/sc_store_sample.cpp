@@ -114,7 +114,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
         {
             if (assembly_tree.DeserializeFromXML(xml_output_path.c_str()))
             {
-
+                printf("Read and Loaded XML Assembly\n");
                 // assembly_tree.SetNodeName(0, "chris overwrite");
                 // // Add an attribute on that node.
                 // assembly_tree.AddAttribute(
@@ -156,6 +156,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                     auto nodeId = (int)attribute->value.toNumber();
                                     auto attributeName = attribute->next->key;
                                     auto attributeValue = attribute->next->value.toString();
+                                    printf("Attribute Name: %s  :::  Value: %s . \n", attributeName, attributeValue);
                                     if (!assembly_tree.AddAttribute(nodeId, attributeName, SC::Store::AssemblyTree::AttributeTypeString, attributeValue))
                                     {
                                         printf("ERROR: Failed to add attribute %s on node %i . \n", attributeName, nodeId);
@@ -238,6 +239,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                     // {
                                     //     printf("ERROR: Failed to set color on instance %i . \n", nodeId);
                                     // } // TODO: publish color updates
+                                    // Need to send over scInstanceId from client. Passing 13 for now. 
                                     model.Set((SC::Store::InstanceKey)13, materialKey,  materialKey, materialKey);
                                 }
                             }
