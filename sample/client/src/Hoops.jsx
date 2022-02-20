@@ -40,10 +40,6 @@ class Hoops extends React.Component {
             new Communicator.Color.white()
           );
         this._viewer.selectionManager.setNodeSelectionColor(new Communicator.Color.green())
-        // this._viewer.selectionManager.setHighlightNodeSelection(false);
-        // this._viewer.selectionManager.setHighlightFaceElementSelection(false);
-        // this._viewer.selectionManager.setHighlightLineElementSelection(false);
-        // this._viewer.selectionManager.setHighlightPointSelection(false);
         },
       });
 

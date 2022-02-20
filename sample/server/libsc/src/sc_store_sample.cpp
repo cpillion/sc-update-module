@@ -114,7 +114,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
         {
             if (assembly_tree.DeserializeFromXML(xml_output_path.c_str()))
             {
-                printf("Read and Loaded XML Assembly\n");
+                printf("Successfully Read and Loaded %s XML Assembly\n", model_name);
                 // assembly_tree.SetNodeName(0, "chris overwrite");
                 // // Add an attribute on that node.
                 // assembly_tree.AddAttribute(
@@ -124,7 +124,6 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                 ///// PROCESS JSON IMPORT
                 char *source = new char[json_input_string.length() + 1];
                 strcpy(source, json_input_string.c_str());
-                // strcpy(source, "{\"colors\":[{\"nodeId\":20,\"color\":{\"r\":229,\"g\":158,\"b\":16},\"scInstanceId\":1}]}");
 
                 // do not forget terminate source string with 0
                 char *endptr;

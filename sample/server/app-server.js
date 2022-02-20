@@ -21,7 +21,6 @@ io.on('connection', (socket) => {
   console.log(`Connection to Client established.`);
 
   socket.on('sc_update_to_author', (libSCdataJSON) => {
-    console.log(libSCdataJSON);
     const child = spawn(
       path.join(__dirname, 'libsc/outputs/libsc_sample'),
       [path.join(__dirname, 'libsc/outputs/modelCache'), 'microengine', libSCdataJSON],
