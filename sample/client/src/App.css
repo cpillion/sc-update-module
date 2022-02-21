@@ -16,7 +16,7 @@
 
 .App-header {
   background-color: #000000;
-  min-height: 15vh;
+  min-height: 16vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -41,7 +41,7 @@
 
 #hoops-container {
   position: relative;
-  width: 45vw;
+  width: 41vw;
   height: 100%;
   float:left;
 }
@@ -49,8 +49,8 @@
 #scUpdateContainer {
   position: relative;
   background-color: lightslategray;
-  padding: 3vh;
-  height: 78vh;
+  padding: 2vh;
+  height: 80vh;
 }
 
 #canvas {
@@ -72,21 +72,27 @@ html, body {
 }
 
 #viewerTools {
-  position: relative;
+  /* position: relative; */
   /* left: 48%; */
   /* margin: 1vh; */
   /* height: 1vh; */
+  /* float: left; */
+  float: left;
+  width: 53vw;
+  margin-left: 2vw;
 }
 
 .uiToolbar  {
-  margin: 2vh;
-  /* float: right; */
-  left: 7vw;
-  position: relative;
+  /* margin: 2vh; */
+  /* float: left; */
+  /* width: 52vw; */
+  /* left: 7vw; */
+  /* position: relative; */
+  /* margin: 3vh; */
 }
 
 .uiToolbar button {
-  margin: 0.5vh;
+  margin: 0.5vw;
   border-radius: 5px;
   font: x-small Inconsolata, monospace;
   height: 3vh;
@@ -104,12 +110,13 @@ html, body {
   background-image: radial-gradient(
     rgba(0, 150, 0, 0.75), black 120%
   );
-  height: 25vh;
-  width: 45vw;
+  height: 30vh;
+  width: 100%;
   color: white;
   font: small Inconsolata, monospace;
   text-shadow: 0 0 5px #C8C8C8;
   float: right;
+  margin-top: 2vh;
   /* padding: 3vh; */
   position: relative;
   border-radius: 5px;
@@ -121,6 +128,34 @@ html, body {
 }
 
 .terminal text {
+  padding-top: .1vh;
+  padding-left: 1vh;
+}
+
+
+.json-terminal {
+  background-color: black;
+  background-image: radial-gradient(
+    rgba(0, 150, 0, 0.75), black 120%
+  );
+  height: 30vh;
+  width: 100%;
+  color: white;
+  font: small Inconsolata, monospace;
+  text-shadow: 0 0 5px #C8C8C8;
+  float: right;
+  margin-top: 2vh;
+  /* padding: 3vh; */
+  position: relative;
+  border-radius: 5px;
+  overflow-y: scroll;
+  overflow-x: scroll;
+  display: flex;
+  flex-direction: column;
+  /* white-space: nowrap; */
+}
+
+.json-terminal p {
   padding-top: .1vh;
   padding-left: 1vh;
 }

@@ -107,14 +107,14 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
         // Open (or Create) the model we care about.
         SC::Store::Model model = cache.Open(output_path.c_str());
         auto modelName = model.GetName();
-        printf("%s\n", modelName);
+        printf("Opened and Loaded SC Model. Model Name: %s\n", modelName);
 
         SC::Store::AssemblyTree assembly_tree(logger);
         // Load/Author assembly tree.
         {
             if (assembly_tree.DeserializeFromXML(xml_output_path.c_str()))
             {
-                printf("Successfully Read and Loaded %s XML Assembly\n", model_name.c_str());
+                printf("Successfully Read and Loaded XML Assembly\n");
                 // assembly_tree.SetNodeName(0, "chris overwrite");
                 // // Add an attribute on that node.
                 // assembly_tree.AddAttribute(
@@ -156,13 +156,40 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                     auto nodeId = (int)attribute->value.toNumber();
                                     auto attributeName = attribute->next->key;
                                     auto attributeValue = attribute->next->value.toString();
-                                    printf("Attribute Name: %s  :::  Value: %s . \n", attributeName, attributeValue);
+                                    printf("Attribute written to node %i  ::  Attribute Name: %s  ::  Attribute Value: %s \n", nodeId, attributeName, attributeValue);
                                     if (!assembly_tree.AddAttribute(nodeId, attributeName, SC::Store::AssemblyTree::AttributeTypeString, attributeValue))
                                     {
                                         printf("ERROR: Failed to add attribute %s on node %i . \n", attributeName, nodeId);
                                     }
                                 }
                                 //}
+                            }
+                        }
+                        else if (strcmp(changeRequestItem->key, "nodeNames") == 0)
+                        {
+                            /*"nodeNames":[
+                                {"nodeId":0,"nodeName":"HC Node"},
+                                {"nodeId":2,"nodeName":"HC Node 2"},
+                            ]
+                            */
+                            // The attributes will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
+                            for (auto nodeNames : changeRequestItem->value)
+                            {
+                                auto nodeName = nodeNames->value.toNode();
+                                // for(auto attribute: attributePair->value){
+                                if (strcmp(nodeName->key, "nodeId") == 0)
+                                {
+                                    auto nodeId = (int)nodeName->value.toNumber();
+                                    if (strcmp(nodeName->next->key, "nodeName") == 0)
+                                    {
+                                        auto nodeNameValue = nodeName->next->value.toString();
+                                        printf("Node %i  was renamed to %s. \n", nodeId, nodeNameValue);
+                                        if (!assembly_tree.SetNodeName(nodeId, nodeNameValue))
+                                        {
+                                            printf("ERROR: Failed to rename node %i to %s. \n", nodeId, nodeNameValue);
+                                        }
+                                    }
+                                }
                             }
                         }
                         else if (strcmp(changeRequestItem->key, "colors") == 0)
@@ -249,6 +276,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                     //     printf("ERROR: Failed to set color on instance %i . \n", nodeId);
                                     // } // TODO: publish color updates
                                     // Need to send over scInstanceId from client. Passing 13 for now.
+                                    printf("Setting color to node %i  ::  ScInstanceId: %i  ::  Color: %f %f %f  \n", nodeId, (int)scInstanceId->value.toNumber(), red, green, blue);
                                     model.Set(scInstanceKey, inputMaterialKey, materialKeyBlack, materialKeyBlack);
                                 }
                             }
@@ -356,6 +384,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                 }
                             }
                             // TODO: Write the default camera settings to the file.
+                            printf("Default Camera Overwritten\n");
                             model.Set(defaultCamera);
                         }
                         else
@@ -368,18 +397,21 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
 
                 delete[] source;
 
-                printf("%s\n", json_update.c_str());
+                // printf("%s\n", json_update.c_str());
                 ///// END JSON IMPORT
 
                 // Serialize authored content to model and xml output
                 auto passed = assembly_tree.SerializeToModel(model);
                 passed = assembly_tree.SerializeToXML(xml_output_path.c_str());
+                printf("Serialized Assembly Tree to Model and XML\n");
 
                 // Prepare the model for streaming.
                 model.PrepareStream();
+                printf("Preparing Stream and authoring SCZ and SCS models.\n");
 
                 model.GenerateSCSFile(scs_output_path.c_str());
                 model.GenerateSCZFile(scz_output_path.c_str());
+                printf("Authoring Complete.\n");
             }
             else
             {

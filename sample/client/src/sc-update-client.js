@@ -16,6 +16,18 @@ export default class scUpdate {
     });
   }
 
+  updateNodeName(nodeId, nodeName) {
+    //Need to add check if nodeId already has attribute updates associated
+    let nodeInfo = {
+      nodeId: nodeId,
+      nodeName: nodeName
+    };
+    if (!this.scChanges.hasOwnProperty('nodeNames')) {
+      this.scChanges.nodeNames = [];
+    }
+    this.scChanges.nodeNames.push(nodeInfo);
+  }
+
   updateAttributes(nodeId, nodeAttributes) {
     //Need to add check if nodeId already has attribute updates associated
     let nodeInfo = {
@@ -52,6 +64,10 @@ export default class scUpdate {
   
   getSocketControl() {
     return this.socket;
+  }
+
+  getScChanges() {
+    return this.scChanges;
   }
 
   sendToLibSc() {
