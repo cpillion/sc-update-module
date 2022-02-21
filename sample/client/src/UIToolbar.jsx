@@ -12,7 +12,7 @@ export default class UIToolbar extends React.Component {
     let hwv = this.props.viewer;
     let selectionResults = hwv.selectionManager.getResults();
     if (selectionResults.length === 0) {
-      alert('Please first select the nodes you would like to add properties for');
+      alert('Please first select the node you would like to rename.');
     }
     // Start with one selection. TODO: add support from multiple selections
     let nodeId = selectionResults[0].getNodeId();
@@ -71,14 +71,15 @@ export default class UIToolbar extends React.Component {
 
   async makeMeshes() {
     let hwv = this.props.viewer;
-    let cubeMeshData = this.createCubeMeshData(20);
+    let cubeMeshData = this.createCubeMeshData(10);
     const cubeMeshId = await hwv.model.createMesh(cubeMeshData);
     let meshInstanceData = new Communicator.MeshInstanceData(cubeMeshId);
     const nodeId = await hwv.model.createMeshInstance(meshInstanceData);
-    this.scUpdate.updateMeshs(
+    const meshDataCopy = await hwv.model.getNodeMeshData(nodeId);
+    this.scUpdate.updateMeshes(
       nodeId,
       hwv.model.getNodeParent(nodeId),
-      hwv.model.getNodeMeshData(nodeId)
+      meshDataCopy
     );
     this.scUpdate.sendToLibSc();
   }

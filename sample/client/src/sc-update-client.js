@@ -60,6 +60,37 @@ export default class scUpdate {
 
   updateMeshes(nodeId, parentNodeId, meshData) {
     // Need to parse meshdatacopy and put into JSON.
+    let meshDataTemplate = {
+      nodeId: nodeId,
+      parentNodeId: parentNodeId,
+      faces: [],
+      lines: [],
+      points: [],
+    }
+
+    let elementTypes = ["faces", "lines", "points"];
+
+    for (let elementType of elementTypes) {
+      let elementGroup = meshData[elementType];
+      if (elementGroup.vertexCount === 0) continue;
+      let egIterator = elementGroup.iterate();
+      let elementMeshData = {
+        position: [],
+      };
+      while (!egIterator.done()) {
+        let vertex = egIterator.next();
+        elementMeshData.position.push(...vertex.position);
+        // if (elementGroup.hasNormals) elementMeshData.normal.push(...vertex.normal);
+        // if (elementGroup.hasRGBAs) elementMeshData.rgba.push(...vertex.rgba);
+        // if (elementGroup.hasUVs) elementMeshData.uv.push(...vertex.uv);
+  
+      }
+      meshDataTemplate[elementType].push(elementMeshData);
+    }
+    if (!this.scChanges.hasOwnProperty('meshes')) {
+      this.scChanges.meshes = [];
+    }
+    this.scChanges.meshes.push(meshDataTemplate);
   }
   
   getSocketControl() {
@@ -71,6 +102,7 @@ export default class scUpdate {
   }
 
   sendToLibSc() {
+    console.log(JSON.stringify(this.scChanges));
     this.socket.emit('sc_update_to_author', JSON.stringify(this.scChanges));
     // Add method to clear tracked updates once they are successfully published.
   }

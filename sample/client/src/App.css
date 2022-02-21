@@ -6,12 +6,13 @@
 
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
-  height: 4vmin;
+  height: 6vmin;
   pointer-events: none;
+  padding-top: 1vh;
 }
 
 .App-logo-name {
-  height: 5vmin;
+  height: 7vmin;
 }
 
 .App-header {
@@ -94,7 +95,7 @@ html, body {
 .uiToolbar button {
   margin: 0.5vw;
   border-radius: 5px;
-  font: x-small Inconsolata, monospace;
+  font: small Inconsolata, monospace;
   height: 3vh;
 }
 
@@ -110,14 +111,14 @@ html, body {
   background-image: radial-gradient(
     rgba(0, 150, 0, 0.75), black 120%
   );
-  height: 30vh;
+  height: 35vh;
   width: 100%;
   color: white;
   font: small Inconsolata, monospace;
   text-shadow: 0 0 5px #C8C8C8;
   float: right;
   margin-top: 2vh;
-  /* padding: 3vh; */
+  padding-top: 1vh;
   position: relative;
   border-radius: 5px;
   overflow-y: scroll;
@@ -127,8 +128,9 @@ html, body {
   white-space: nowrap;
 }
 
-.terminal text {
-  padding-top: .1vh;
+.terminal p {
+  margin: .1vw 1vh .1vw 1vh;
+  padding-top: 0;
   padding-left: 1vh;
 }
 
@@ -138,7 +140,7 @@ html, body {
   background-image: radial-gradient(
     rgba(0, 150, 0, 0.75), black 120%
   );
-  height: 30vh;
+  height: 35vh;
   width: 100%;
   color: white;
   font: small Inconsolata, monospace;
@@ -155,10 +157,10 @@ html, body {
   /* white-space: nowrap; */
 }
 
-.json-terminal p {
+/* .json-terminal text {
   padding-top: .1vh;
   padding-left: 1vh;
-}
+} */
 
 
 ::-webkit-scrollbar {

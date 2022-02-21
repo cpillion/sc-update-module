@@ -52,6 +52,49 @@ void revertFilesFromOrig(std::string &file_path)
     file_path_stream << orig_file_stream.rdbuf();
 }
 
+static void
+AddSquareFace(
+    SC::Store::Mesh &mesh,
+    uint32_t const *point_indices,
+    uint32_t normal_index,
+    uint32_t rgba_index)
+{
+    mesh.face_elements.emplace_back();
+    SC::Store::MeshElement &face = mesh.face_elements.back();
+
+    // Add first face triangle
+    for (size_t i = 0; i < 3; ++i)
+    {
+        face.indices.push_back(point_indices[i]);
+        face.indices.push_back(normal_index);
+        face.indices.push_back(rgba_index);
+    }
+
+    // Add second face triangle
+    for (size_t i = 0; i < 3; ++i)
+    {
+        face.indices.push_back(point_indices[(i + 2) % 4]);
+        face.indices.push_back(normal_index);
+        face.indices.push_back(rgba_index);
+    }
+
+    // Add face edges
+    for (size_t i = 0; i < 4; ++i)
+    {
+        mesh.polyline_elements.emplace_back();
+        SC::Store::MeshElement &edges = mesh.polyline_elements.back();
+        edges.indices.push_back(point_indices[i % 4]);
+        edges.indices.push_back(rgba_index);
+        edges.indices.push_back(point_indices[(i + 1) % 4]);
+        edges.indices.push_back(rgba_index);
+        // Set bits on edges so that they are selectable for measurement
+        mesh.polyline_elements_bits.push_back(SC::Store::SelectionBitsEdgeHasMeasurementData);
+    }
+    // Set bits on faces so that they are selectable for measurement
+    mesh.face_elements_bits.push_back(
+        SC::Store::SelectionBitsFaceHasMeasurementData | SC::Store::SelectionBitsFacePlanar);
+}
+
 int StoreSample(const std::string &model_output_path, const std::string &model_name = "sc-model-default", const std::string &json_update = "")
 {
     std::string json_input_string = json_update;
@@ -172,7 +215,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                 {"nodeId":2,"nodeName":"HC Node 2"},
                             ]
                             */
-                            // The attributes will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
+                            // The nodeNames will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
                             for (auto nodeNames : changeRequestItem->value)
                             {
                                 auto nodeName = nodeNames->value.toNode();
@@ -386,6 +429,168 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                             // TODO: Write the default camera settings to the file.
                             printf("Default Camera Overwritten\n");
                             model.Set(defaultCamera);
+                        }
+                        else if (strcmp(changeRequestItem->key, "meshes") == 0)
+                        {
+                            // The meshes will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
+                            for (auto meshTemplates : changeRequestItem->value)
+                            {
+                                std::vector<SC::Store::MeshElement> faceMeshElements;
+                                auto meshTemplate = meshTemplates->value.toNode();
+                                // for(auto attribute: attributePair->value){
+                                if (strcmp(meshTemplate->key, "nodeId") == 0)
+                                {
+                                    auto nodeId = (int)meshTemplate->value.toNumber();
+                                    auto parentNodeId = (int)meshTemplate->next->value.toNumber();
+                                    auto meshFacesNode = meshTemplate->next->next;
+                                    ;
+                                    if (strcmp(meshFacesNode->key, "faces") == 0)
+                                    {
+                                        for (auto meshElementFaces : meshFacesNode->value)
+                                        {
+                                            auto faceElementData = meshElementFaces->value.toNode();
+                                            bool hasNormals, hasRGBAs, hasUVs;
+                                            // SC::Store::Mesh faceMesh;
+                                            // // faceMesh.flags = SC::Store::Mesh::Bits::
+                                            // auto i = 0;
+                                            // auto pointCount = 0;
+                                            // std::vector<SC::Store::Point> vertices = {};
+                                            // for (auto position : faceElementData->value)
+                                            // {
+                                            //     SC::Store::Point vertex;
+                                            //     switch (i)
+                                            //     {
+                                            //     case 0:
+                                            //         vertex.x = position->value.toNumber();
+                                            //         i++;
+                                            //         break;
+                                            //     case 1:
+                                            //         vertex.y = position->value.toNumber();
+                                            //         i++;
+                                            //         break;
+                                            //     case 2:
+                                            //         vertex.z = position->value.toNumber();
+                                            //         i = 0;
+                                            //         vertices.push_back(vertex);
+                                            //         pointCount++;
+                                            //         break;
+                                            //     }
+                                            // }
+                                            // faceMesh.point_count = pointCount;
+                                            // SC::Store::Point *points = &vertices[0];
+                                            // faceMesh.points = points;
+                                            // SC::Store::MeshElement faceElement;
+                                            // std::vector<SC::Store::NodeId> indices =
+                                            //     {
+                                            //         // front
+                                            //         0, 1, 3,
+                                            //         1, 2, 3,
+                                            //         // back
+                                            //         4, 5, 7,
+                                            //         5, 6, 7,
+                                            //         // right
+                                            //         0, 1, 4,
+                                            //         1, 4, 5,
+                                            //         // left
+                                            //         2, 3, 7,
+                                            //         2, 6, 7,
+                                            //         // top
+                                            //         0, 3, 4,
+                                            //         3, 4, 7,
+                                            //         // bottom
+                                            //         1, 2, 5,
+                                            //         2, 5, 6
+                                            // };
+                                            // faceElement.indices = indices;
+                                            // faceMesh.face_elements.push_back(faceElement);
+                                            // auto meshKey = model.Insert(faceMesh);
+
+                                            SC::Store::Mesh mesh;
+                                            mesh.flags = (SC::Store::Mesh::Bits)(
+                                                SC::Store::Mesh::ClockwiseWinding | SC::Store::Mesh::FaceNormals | SC::Store::Mesh::FaceRGBA32s | SC::Store::Mesh::LineRGBA32s | SC::Store::Mesh::Manifold);
+
+                                            SC::Store::Point points[] = {
+                                                {-10, -10, 10}, // 0
+                                                {10, -10, 10}, // 1
+                                                {-10, -10, -10}, // 2
+                                                {10, -10, -10}, // 3
+                                                {10, 10, 10}, // 4
+                                                {10, 10, -10}, // 5
+                                                {-10, 10, 10}, // 6
+                                                {-10, 10, -10}, // 7
+                                            };
+                                            mesh.points = points;
+                                            mesh.point_count = 8;
+
+                                            SC::Store::Normal normals[] = {
+                                                {0, -1, 0}, // 0
+                                                {0, 0, 1},  // 1
+                                                {0, 1, 0},  // 2
+                                                {0, 0, -1}, // 3
+                                                {1, 0, 0},  // 4
+                                                {-1, 0, 0}, // 5
+                                            };
+                                            mesh.normals = normals;
+                                            mesh.normal_count = 6;
+
+                                            SC::Store::RGBA32 rgba32s[] = {
+                                                {255, 0, 0, 255},   // 0
+                                                {255, 0, 0, 255},   // 1
+                                                {255, 0, 0, 255},   // 2
+                                                {255, 0, 0, 255}, // 3
+                                                {255, 0, 0, 255}, // 4
+                                                {255, 0, 0, 255}, // 5
+                                            };
+                                            mesh.rgba32s = rgba32s;
+                                            mesh.rgba32_count = 6;
+
+                                            {
+                                                uint32_t point_indices[] = {0, 1, 3, 2};
+                                                uint32_t normal_index = 0;
+                                                uint32_t rgba32_index = 0;
+                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            }
+                                            {
+                                                uint32_t point_indices[] = {6, 4, 1, 0};
+                                                uint32_t normal_index = 1;
+                                                uint32_t rgba32_index = 1;
+                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            }
+                                            {
+                                                uint32_t point_indices[] = {7, 5, 4, 6};
+                                                uint32_t normal_index = 2;
+                                                uint32_t rgba32_index = 2;
+                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            }
+                                            {
+                                                uint32_t point_indices[] = {2, 3, 5, 7};
+                                                uint32_t normal_index = 3;
+                                                uint32_t rgba32_index = 3;
+                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            }
+                                            {
+                                                uint32_t point_indices[] = {1, 4, 5, 3};
+                                                uint32_t normal_index = 4;
+                                                uint32_t rgba32_index = 4;
+                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            }
+                                            {
+                                                uint32_t point_indices[] = {6, 0, 2, 7};
+                                                uint32_t normal_index = 5;
+                                                uint32_t rgba32_index = 5;
+                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            }
+                                            auto meshKey = model.Insert(mesh);
+                                            auto instanceKey = model.Instance(meshKey);
+                                            SC::Store::NodeId childNodeId = nodeId;
+                                            SC::Store::NodeId bodyInstanceNode = 0;
+                                            assembly_tree.CreateChild(parentNodeId, childNodeId);
+                                            assembly_tree.CreateAndAddBodyInstance(childNodeId, bodyInstanceNode);
+                                        }
+                                    }
+                                }
+                                //}
+                            }
                         }
                         else
                         {
