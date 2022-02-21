@@ -1,23 +1,20 @@
 import React from 'react';
 import Communicator from 'communicator';
+import scUpdate from './sc-update-client';
 
 export default class UIToolbar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.scUpdate = this.props.scUpdate;
-    this.colorInput = undefined;
+  constructor() {
+    super();
+    this.scUpdate = new scUpdate('http://localhost:5000');
   }
 
   addNodeProperties() {
     let hwv = this.props.viewer;
     let selectionResults = hwv.selectionManager.getResults();
+    // Start with one selection. TODO: add support from multiple selections
+    let nodeId;
     if (selectionResults.length === 0) {
       alert('Please first select the nodes you would like to add properties for');
-    }
-    // Start with one selection. TODO: add support from multiple selections
-    let nodeId = selectionResults[0].getNodeId();
-    if (hwv.model.getNodeType(nodeId) === Communicator.NodeType.BodyInstance) {
-      alert('Error: Cannot write attributes to a body instance!');
     } else {
       // Todo: Create modal, form, etc to collect this data. Using prompt for now.
       let propertyName = prompt('Enter the property name: ', 'Material');
@@ -31,28 +28,19 @@ export default class UIToolbar extends React.Component {
 
   setDefaultView() {
     let camera = this.props.viewer.view.getCamera();
-    this.scUpdate.updateDefaultCameraView(camera.toJson());
+    this.scUpdate.updateDefaultCameraView(camera);
     this.scUpdate.sendToLibSc();
   }
 
   updateModelColors() {
-    let hwv = this.props.viewer;
-    let selectionResults = hwv.selectionManager.getResults();
-    if (selectionResults.length === 0) {
-      alert('Please first select the nodes you would like to change color');
-    }
-    let nodeIds = selectionResults.map((selectionItem) => selectionItem.getNodeId());
-    let rgbColor = this.hexToRgb(this.colorInput);
-    let color = new Communicator.Color(rgbColor.r, rgbColor.g, rgbColor.b);
+    let nodeIds = [8, 9, 10, 11]; // Screws nodeIds
+    let color = new Communicator.Color.green();
     let colorMap = new Map();
-    let scInstanceIdsMap = new Map();
     for (let nodeId of nodeIds) {
       colorMap.set(nodeId, color);
-      //if (hwv.model.getNodeType(nodeId) )
-      scInstanceIdsMap.set(nodeId, hwv.model.getSCInstanceKey(nodeId));
     }
     this.props.viewer.model.setNodesColors(colorMap);
-    this.scUpdate.updateColors(colorMap, scInstanceIdsMap);
+    this.scUpdate.updateColors(colorMap);
     this.scUpdate.sendToLibSc();
   }
 
@@ -102,12 +90,12 @@ export default class UIToolbar extends React.Component {
     const cubeMeshId = await hwv.model.createMesh(cubeMeshData);
     let meshInstanceData = new Communicator.MeshInstanceData(cubeMeshId);
     const nodeId = await hwv.model.createMeshInstance(meshInstanceData);
-    this.scUpdate.updateMeshs(
+    scUpdate.updateMeshs(
       nodeId,
       hwv.model.getNodeParent(nodeId),
       hwv.model.getNodeMeshData(nodeId)
     );
-    this.scUpdate.sendToLibSc();
+    scUpdate.sendToLibSc();
   }
 
   createCubeMeshData(size) {
@@ -185,18 +173,19 @@ export default class UIToolbar extends React.Component {
     return cubeMeshData;
   }
 
-  hexToRgb(hex) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
-  }
-
   render() {
     return (
-      <div id="uiToolbar" className='uiToolbar'>
+      <>
+        <button
+          id="home-button"
+          onClick={() => {
+            this.props.viewer.view
+              .resetCamera(750)
+              .then(() => this.props.viewer.view.fitWorld(750));
+          }}
+        >
+          Home
+        </button>
         <button
           id="add-property-button"
           onClick={() => {
@@ -229,16 +218,7 @@ export default class UIToolbar extends React.Component {
         >
           Insert and Author Sample Mesh
         </button>
-          <input
-            type="color"
-            id="colorpicker"
-            name="colorpicker"
-            value="#f6b73c"
-            onChange={(e) => {
-              this.colorInput = e.target.value;
-            }}
-          />
-      </div>
+      </>
     );
   }
 }
