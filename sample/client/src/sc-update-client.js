@@ -54,6 +54,10 @@ export default class scUpdate {
     return this.socket;
   }
 
+  getScChanges() {
+    return this.scChanges;
+  }
+
   sendToLibSc() {
     this.socket.emit('sc_update_to_author', JSON.stringify(this.scChanges));
     // Add method to clear tracked updates once they are successfully published.

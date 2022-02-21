@@ -73,6 +73,9 @@ class Hoops extends React.Component {
           <div id="terminal-output" className="terminal">
             {terminalOutput}
           </div>
+          <pre id="json-output" className="json-terminal">
+            {JSON.stringify(this.scUpdate.getScChanges(), undefined, 2)}
+          </pre>
         </div>
       );
     }
