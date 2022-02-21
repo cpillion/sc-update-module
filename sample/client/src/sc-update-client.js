@@ -47,23 +47,7 @@ export default class scUpdate {
   }
 
   updateMeshes(nodeId, parentNodeId, meshData) {
-    if (!this.scChanges.hasOwnProperty('meshes')) {
-      this.scChanges.meshes = [];
-    }
     // Need to parse meshdatacopy and put into JSON.
-      let nodeInfo = {
-        nodeId: nodeId,
-        parentNodeId: parentNodeId,
-        mesh: {
-          faces: meshData.faces,
-          isMainfold: meshData.isMainfold,
-          isTwoSided: meshData.isTwoSided,
-          points: meshData.points,
-          lines: meshData.lines,
-          winding: meshData.winding
-        }
-      }
-      this.scChanges.meshes.push(nodeInfo);
   }
   
   getSocketControl() {
@@ -71,9 +55,7 @@ export default class scUpdate {
   }
 
   sendToLibSc() {
-    let jsonSendText = JSON.stringify(this.scChanges);
-    console.log(jsonSendText);
-    this.socket.emit('sc_update_to_author', jsonSendText);
+    this.socket.emit('sc_update_to_author', JSON.stringify(this.scChanges));
     // Add method to clear tracked updates once they are successfully published.
   }
 }

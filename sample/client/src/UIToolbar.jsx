@@ -56,46 +56,6 @@ export default class UIToolbar extends React.Component {
     this.scUpdate.sendToLibSc();
   }
 
- createPointCube(size) {
-    const points = [];
-    const pointCube = new Communicator.MeshData();
-    for (let x = -size; x <= size; x++) {
-        for (let y = -size; y <= size; y++) {
-            for (let z = -size; z <= size; z++) {
-                points.push(x, y, z);
-            }
-        }
-    }
-    pointCube.addPoints(points);
-    return pointCube;
-  }
-
-  async createJeffTestMesh(){
-    let hwv = this.props.viewer;
-    const size = 20;
-    const cubeMeshData = this.createPointCube(size);
-    const cubeMeshId = await hwv.model.createMesh(cubeMeshData);
-
-    let meshInstanceData = new Communicator.MeshInstanceData(cubeMeshId);
-    // Set the color of the points to blue
-    meshInstanceData.setPointColor(Communicator.Color.blue());
-    hwv.view.setPointShape(Communicator.PointShape.Sphere);
-    hwv.view.setPointSize(10, Communicator.PointSizeUnit.ScreenPixels);
-    meshInstanceData.setPointOpacity(1.0);
-    const nodeId = await hwv.model.createMeshInstance(meshInstanceData);
-    hwv.model.getNodeMeshData(nodeId).then(function(meshData) {
-      this.scUpdate.updateMeshes(
-        nodeId,
-        this.hwv.model.getNodeParent(nodeId),
-        meshData
-      );
-      this.scUpdate.sendToLibSc();
-      console.log("Processing Mesh Data");
-    }, 
-      console.log("Failed to get mesh data\n"));
-    console.log(scUpdate);
-  }
-
   async makeMeshes() {
     let hwv = this.props.viewer;
     let cubeMeshData = this.createCubeMeshData(20);
@@ -224,7 +184,7 @@ export default class UIToolbar extends React.Component {
         <button
           id="update-colors-button"
           onClick={() => {
-            this.createJeffTestMesh();
+            this.makeMeshes();
           }}
         >
           Insert and Author Sample Mesh
