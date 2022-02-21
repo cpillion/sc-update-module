@@ -114,7 +114,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
         {
             if (assembly_tree.DeserializeFromXML(xml_output_path.c_str()))
             {
-                printf("Successfully Read and Loaded %s XML Assembly\n", model_name);
+                printf("Successfully Read and Loaded %s XML Assembly\n", model_name.c_str());
                 // assembly_tree.SetNodeName(0, "chris overwrite");
                 // // Add an attribute on that node.
                 // assembly_tree.AddAttribute(
