@@ -113,7 +113,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
         // Load/Author assembly tree.
         {
             if (assembly_tree.DeserializeFromXML(xml_output_path.c_str()))
-            {                
+            {
                 printf("Successfully Read and Loaded XML Assembly\n");
                 // assembly_tree.SetNodeName(0, "chris overwrite");
                 // // Add an attribute on that node.
@@ -163,6 +163,33 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                     }
                                 }
                                 //}
+                            }
+                        }
+                        else if (strcmp(changeRequestItem->key, "nodeNames") == 0)
+                        {
+                            /*"nodeNames":[
+                                {"nodeId":0,"nodeName":"HC Node"},
+                                {"nodeId":2,"nodeName":"HC Node 2"},
+                            ]
+                            */
+                            // The attributes will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
+                            for (auto nodeNames : changeRequestItem->value)
+                            {
+                                auto nodeName = nodeNames->value.toNode();
+                                // for(auto attribute: attributePair->value){
+                                if (strcmp(nodeName->key, "nodeId") == 0)
+                                {
+                                    auto nodeId = (int)nodeName->value.toNumber();
+                                    if (strcmp(nodeName->next->key, "nodeName") == 0)
+                                    {
+                                        auto nodeNameValue = nodeName->next->value.toString();
+                                        printf("Node %i  was renamed to %s. \n", nodeId, nodeNameValue);
+                                        if (!assembly_tree.SetNodeName(nodeId, nodeNameValue))
+                                        {
+                                            printf("ERROR: Failed to rename node %i to %s. \n", nodeId, nodeNameValue);
+                                        }
+                                    }
+                                }
                             }
                         }
                         else if (strcmp(changeRequestItem->key, "colors") == 0)
@@ -370,7 +397,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
 
                 delete[] source;
 
-                //printf("%s\n", json_update.c_str());
+                // printf("%s\n", json_update.c_str());
                 ///// END JSON IMPORT
 
                 // Serialize authored content to model and xml output
@@ -382,11 +409,9 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                 model.PrepareStream();
                 printf("Preparing Stream and authoring SCZ and SCS models.\n");
 
-
                 model.GenerateSCSFile(scs_output_path.c_str());
                 model.GenerateSCZFile(scz_output_path.c_str());
                 printf("Authoring Complete.\n");
-
             }
             else
             {

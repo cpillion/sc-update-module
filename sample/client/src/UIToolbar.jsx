@@ -8,6 +8,19 @@ export default class UIToolbar extends React.Component {
     this.colorInput = undefined;
   }
 
+  editNodeName() {    
+    let hwv = this.props.viewer;
+    let selectionResults = hwv.selectionManager.getResults();
+    if (selectionResults.length === 0) {
+      alert('Please first select the nodes you would like to add properties for');
+    }
+    // Start with one selection. TODO: add support from multiple selections
+    let nodeId = selectionResults[0].getNodeId();
+    let nodeNameToWrite = prompt('Enter new the node name: ', 'HC Node');
+    this.scUpdate.updateNodeName(nodeId, nodeNameToWrite);
+    this.scUpdate.sendToLibSc()
+  }
+
   addNodeProperties() {
     let hwv = this.props.viewer;
     let selectionResults = hwv.selectionManager.getResults();
@@ -157,6 +170,14 @@ export default class UIToolbar extends React.Component {
   render() {
     return (
       <div id="uiToolbar" className='uiToolbar'>
+        <button
+          id="edit-node-name-button"
+          onClick={() => {
+            this.editNodeName();
+          }}
+        >
+          Edit Node Name
+        </button>
         <button
           id="add-property-button"
           onClick={() => {

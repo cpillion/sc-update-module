@@ -155,7 +155,7 @@ html, body {
   /* white-space: nowrap; */
 }
 
-.json-terminal text {
+.json-terminal p {
   padding-top: .1vh;
   padding-left: 1vh;
 }
