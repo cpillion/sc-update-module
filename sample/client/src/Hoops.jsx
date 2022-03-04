@@ -33,7 +33,6 @@ class Hoops extends React.Component {
       // (more difficult to unregister that in HC)
       this._viewer.setCallbacks({
         modelStructureReady: () => this._viewer.fitWorld(),
-        selectionArray: () => console.log('Selection Changed'),
         sceneReady: () => {
           this._viewer.view.setBackgroundColor(
             new Communicator.Color.black(),
@@ -61,8 +60,8 @@ class Hoops extends React.Component {
       let terminalOutput = [];
 
       if (this.state.libScStdOut.length > 0) {
-        for (let stdoutline of this.state.libScStdOut) {
-          terminalOutput.push(<text>{stdoutline}</text>);
+        for (let [index, stdoutline] of this.state.libScStdOut.entries()) {
+          terminalOutput.push(<p key={index}>{stdoutline}</p>);
         }
       }
 
