@@ -36,7 +36,7 @@ class Hoops extends React.Component {
         sceneReady: () => {
           this._viewer.view.setBackgroundColor(
             new Communicator.Color.black(),
-            new Communicator.Color.white()
+            new Communicator.Color(18, 116, 162)
           );
         this._viewer.selectionManager.setNodeSelectionColor(new Communicator.Color.green())
         },
@@ -57,7 +57,7 @@ class Hoops extends React.Component {
       viewerElement = <div></div>;
     } else {
       // Now that the viewer is instantiated, we can render any other components that depend on it (like UI for the viewer or part info)
-      let terminalOutput = [];
+      let terminalOutput = [<p>The libsc server is ready to capture updates...</p>];
 
       if (this.state.libScStdOut.length > 0) {
         for (let [index, stdoutline] of this.state.libScStdOut.entries()) {
@@ -69,12 +69,15 @@ class Hoops extends React.Component {
         <div id="viewerTools">
           <UIToolbar viewer={this._viewer} scUpdate={this.scUpdate} />
           {/* <InformationPane viewer={this._viewer}/> */}
+          <pre id="json-output" className="json-terminal">
+            <p>JSON ScUpdate Object
+            <br/>
+            {JSON.stringify(this.scUpdate.getScChanges(), undefined, 2)}
+            </p>
+          </pre>
           <div id="terminal-output" className="terminal">
             {terminalOutput}
           </div>
-          <pre id="json-output" className="json-terminal">
-            {JSON.stringify(this.scUpdate.getScChanges(), undefined, 2)}
-          </pre>
         </div>
       );
     }

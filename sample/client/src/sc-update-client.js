@@ -4,11 +4,6 @@ export default class scUpdate {
   constructor(libScServerEndpoint) {
     this.scChanges = {};
     this.socket = io(libScServerEndpoint, { transports: ['websocket'] });
-    // this.libScStdOut = "";
-
-    // this.socket.on('libscstdout', (outputStream)=> {
-    //   this.libScStdOut += outputStream;
-    // })
 
     // Socket.io error info for debugging
     this.socket.on('connect_error', (err) => {

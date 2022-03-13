@@ -177,7 +177,7 @@ export default class UIToolbar extends React.Component {
             this.editNodeName();
           }}
         >
-          Edit Node Name
+          Edit Selected Node Name
         </button>
         <button
           id="add-property-button"
@@ -185,7 +185,7 @@ export default class UIToolbar extends React.Component {
             this.addNodeProperties();
           }}
         >
-          Add Node Property
+          Add Property to Selected Node
         </button>
         <button
           id="update-view-button"
@@ -201,17 +201,9 @@ export default class UIToolbar extends React.Component {
             this.updateModelColors();
           }}
         >
-          Set and Author Assigned Colors
+          Set and Author Assigned Node Colors
         </button>
-        <button
-          id="update-colors-button"
-          onClick={() => {
-            this.makeMeshes();
-          }}
-        >
-          Insert and Author Sample Mesh
-        </button>
-          <input
+        <input
             type="color"
             id="colorpicker"
             name="colorpicker"
@@ -220,6 +212,30 @@ export default class UIToolbar extends React.Component {
               this.colorInput = e.target.value;
             }}
           />
+        <button
+          id="update-transforms-button"
+          onClick={() => {
+            this.updateTransforms();
+          }}
+        >
+        Save Updated Node Transformations
+        </button>
+        <button
+          id="update-textures-button"
+          onClick={() => {
+            this.updateTextures();
+          }}
+        >
+        Save Applied Textures
+        </button>
+        <button
+          id="update-meshes-button"
+          onClick={() => {
+            this.makeMeshes();
+          }}
+        >
+          Insert and Author Sample Mesh
+        </button>
       </div>
     );
   }
