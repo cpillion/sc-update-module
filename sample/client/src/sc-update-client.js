@@ -63,9 +63,13 @@ export default class scUpdate {
     let meshDataTemplate = {
       nodeId: nodeId,
       parentNodeId: parentNodeId,
+      localTransform: undefined,
       faces: [],
       lines: [],
       points: [],
+      winding: meshData.winding,
+      isTwoSided: meshData.isTwoSided,
+      isManifold: meshData.isManifold,
     }
 
     let elementTypes = ["faces", "lines", "points"];
@@ -74,18 +78,21 @@ export default class scUpdate {
       let elementGroup = meshData[elementType];
       if (elementGroup.vertexCount === 0) continue;
       let egIterator = elementGroup.iterate();
-      let elementMeshData = {
+      let meshElementData = {
         position: [],
+        normal: [],
+        rgba: [],
+        uv: [],
       };
       while (!egIterator.done()) {
         let vertex = egIterator.next();
-        elementMeshData.position.push(...vertex.position);
-        // if (elementGroup.hasNormals) elementMeshData.normal.push(...vertex.normal);
-        // if (elementGroup.hasRGBAs) elementMeshData.rgba.push(...vertex.rgba);
-        // if (elementGroup.hasUVs) elementMeshData.uv.push(...vertex.uv);
-  
+        meshElementData.position.push(...vertex.position);
+        if (elementGroup.hasNormals) meshElementData.normal.push(...vertex.normal);
+        if (elementGroup.hasRGBAs) meshElementData.rgba.push(...vertex.rgba);
+        if (elementGroup.hasUVs) meshElementData.uv.push(...vertex.uv);
       }
-      meshDataTemplate[elementType].push(elementMeshData);
+      
+      meshDataTemplate[elementType].push(meshElementData);
     }
     if (!this.scChanges.hasOwnProperty('meshes')) {
       this.scChanges.meshes = [];
