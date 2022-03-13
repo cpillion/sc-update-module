@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"type": "cppbuild",
-			"label": "C/C++: g++ build libsc sample",
+			"label": "build sc_sample (x86_64)",
 			"command": "/usr/bin/g++",
 			"args": [
 				"-std=c++11",
@@ -12,14 +12,15 @@
 				"-g",
 				"${fileDirname}/*.cpp",
 				"-o",
-				"${workspaceFolder}/sample/server/libsc/outputs/libsc_sample",
+				"${workspaceFolder}/sample/server/libsc/outputs/libsc_sample.x86_64",
 				"-I../include",
 				"-L../lib/macos",
 				"-L../bin/macos",
 				"-lsc",
 				"-lsc_utils",
 				"-lsc_utils_text",
-				"-lhps_core"
+				"-lhps_core",
+				"-arch", "x86_64",
 			],
 			"options": {
 				"cwd": "${fileDirname}"

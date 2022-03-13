@@ -173,16 +173,11 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                 JsonValue value;
                 JsonAllocator allocator;
                 int status = jsonParse(source, &endptr, &value, allocator);
-                if (status != JSON_OK)
-                {
+                if (status != JSON_OK) {
                     fprintf(stderr, "%s at %zd\n", jsonStrError(status), endptr - source);
-                }
-                else
-                {
-                    for (auto changeRequestItem : value)
-                    {
-                        if (strcmp(changeRequestItem->key, "attributes") == 0)
-                        {
+                } else {
+                    for (auto changeRequestItem : value) {
+                        if (strcmp(changeRequestItem->key, "attributes") == 0) {
                             /*"attributes":[
                                 {"nodeId":67,"Material":"Inconel"},
                                 {"nodeId":28,"Material":"Steel"},
@@ -190,62 +185,48 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                 {"nodeId":95,"Manufacture Date":"10/22/2021"}]
                             */
                             // The attributes will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
-                            for (auto attributes : changeRequestItem->value)
-                            {
+                            for (auto attributes : changeRequestItem->value) {
                                 auto attribute = attributes->value.toNode();
                                 // for(auto attribute: attributePair->value){
-                                if (strcmp(attribute->key, "nodeId") == 0)
-                                {
+                                if (strcmp(attribute->key, "nodeId") == 0) {
                                     auto nodeId = (int)attribute->value.toNumber();
                                     auto attributeName = attribute->next->key;
                                     auto attributeValue = attribute->next->value.toString();
                                     printf("Attribute written to node %i  ::  Attribute Name: %s  ::  Attribute Value: %s \n", nodeId, attributeName, attributeValue);
-                                    if (!assembly_tree.AddAttribute(nodeId, attributeName, SC::Store::AssemblyTree::AttributeTypeString, attributeValue))
-                                    {
+                                    if (!assembly_tree.AddAttribute(nodeId, attributeName, SC::Store::AssemblyTree::AttributeTypeString, attributeValue)) {
                                         printf("ERROR: Failed to add attribute %s on node %i . \n", attributeName, nodeId);
                                     }
                                 }
-                                //}
                             }
-                        }
-                        else if (strcmp(changeRequestItem->key, "nodeNames") == 0)
-                        {
+                        } else if (strcmp(changeRequestItem->key, "nodeNames") == 0) {
                             /*"nodeNames":[
                                 {"nodeId":0,"nodeName":"HC Node"},
                                 {"nodeId":2,"nodeName":"HC Node 2"},
                             ]
                             */
                             // The nodeNames will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
-                            for (auto nodeNames : changeRequestItem->value)
-                            {
+                            for (auto nodeNames : changeRequestItem->value) {
                                 auto nodeName = nodeNames->value.toNode();
                                 // for(auto attribute: attributePair->value){
-                                if (strcmp(nodeName->key, "nodeId") == 0)
-                                {
+                                if (strcmp(nodeName->key, "nodeId") == 0) {
                                     auto nodeId = (int)nodeName->value.toNumber();
-                                    if (strcmp(nodeName->next->key, "nodeName") == 0)
-                                    {
+                                    if (strcmp(nodeName->next->key, "nodeName") == 0) {
                                         auto nodeNameValue = nodeName->next->value.toString();
                                         printf("Node %i  was renamed to %s. \n", nodeId, nodeNameValue);
-                                        if (!assembly_tree.SetNodeName(nodeId, nodeNameValue))
-                                        {
+                                        if (!assembly_tree.SetNodeName(nodeId, nodeNameValue)) {
                                             printf("ERROR: Failed to rename node %i to %s. \n", nodeId, nodeNameValue);
                                         }
                                     }
                                 }
                             }
-                        }
-                        else if (strcmp(changeRequestItem->key, "colors") == 0)
-                        {
+                        } else if (strcmp(changeRequestItem->key, "colors") == 0) {
                             /*"colors":[{"nodeIds":[8,9,10,11],"color":{"r":255,"g":0,"b":0}}]}*/
                             float red, green, blue = 0.0;
 
                             // The colors will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
-                            for (auto colors : changeRequestItem->value)
-                            {
+                            for (auto colors : changeRequestItem->value) {
                                 auto colorNode = colors->value.toNode();
-                                if (strcmp(colorNode->key, "nodeIds") == 0)
-                                {
+                                if (strcmp(colorNode->key, "nodeIds") == 0) {
                                     // auto color = colorNode->next;
                                     // if (strcmp(color->key, "color") == 0)
                                     // {
@@ -280,32 +261,23 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                     //         }
                                     //     }
                                     // }
-                                }
-                                else if (strcmp(colorNode->key, "nodeId") == 0)
-                                {
+                                    printf("We don't process nodeIds");
+                                } else if (strcmp(colorNode->key, "nodeId") == 0) {
                                     auto color = colorNode->next;
-                                    if (strcmp(color->key, "color") == 0)
-                                    {
-                                        for (auto rgbValues : color->value)
-                                        {
-                                            if (strcmp(rgbValues->key, "r") == 0)
-                                            {
+                                    if (strcmp(color->key, "color") == 0) {
+                                        for (auto rgbValues : color->value) {
+                                            if (strcmp(rgbValues->key, "r") == 0) {
                                                 red = (rgbValues->value.toNumber()) / 255.0;
-                                            }
-                                            else if (strcmp(rgbValues->key, "g") == 0)
-                                            {
+                                            } else if (strcmp(rgbValues->key, "g") == 0) {
                                                 green = (rgbValues->value.toNumber()) / 255.0;
-                                            }
-                                            else if (strcmp(rgbValues->key, "b") == 0)
-                                            {
+                                            } else if (strcmp(rgbValues->key, "b") == 0) {
                                                 blue = (rgbValues->value.toNumber()) / 255.0;
                                             }
                                         }
                                     }
                                     SC::Store::InstanceKey scInstanceKey;
                                     auto scInstanceId = color->next;
-                                    if (strcmp(scInstanceId->key, "scInstanceId") == 0)
-                                    {
+                                    if (strcmp(scInstanceId->key, "scInstanceId") == 0) {
                                         scInstanceKey = scInstanceId->value.toNumber();
                                     }
 
@@ -323,9 +295,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                     model.Set(scInstanceKey, inputMaterialKey, materialKeyBlack, materialKeyBlack);
                                 }
                             }
-                        }
-                        else if (strcmp(changeRequestItem->key, "defaultCamera") == 0)
-                        {
+                        } else if (strcmp(changeRequestItem->key, "defaultCamera") == 0) {
                             SC::Store::Camera defaultCamera;
                             /*"defaultCamera":
                             {"_position":{"x":81.22082242242087,"y":-99.85364263567925,"z":-14.745490335642312},
@@ -337,22 +307,14 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                             "_nearLimit":0.01,
                             "_cameraFlags":0},
                             */
-                            for (auto cameraSettings : changeRequestItem->value)
-                            {
-                                if (strcmp(cameraSettings->key, "position") == 0)
-                                {
-                                    for (auto xyzVals : cameraSettings->value)
-                                    {
-                                        if (strcmp(xyzVals->key, "x") == 0)
-                                        {
+                            for (auto cameraSettings : changeRequestItem->value) {
+                                if (strcmp(cameraSettings->key, "position") == 0) {
+                                    for (auto xyzVals : cameraSettings->value) {
+                                        if (strcmp(xyzVals->key, "x") == 0) {
                                             defaultCamera.position.x = xyzVals->value.toNumber();
-                                        }
-                                        else if (strcmp(xyzVals->key, "y") == 0)
-                                        {
+                                        } else if (strcmp(xyzVals->key, "y") == 0) {
                                             defaultCamera.position.y = xyzVals->value.toNumber();
-                                        }
-                                        else if (strcmp(xyzVals->key, "z") == 0)
-                                        {
+                                        } else if (strcmp(xyzVals->key, "z") == 0) {
                                             defaultCamera.position.z = xyzVals->value.toNumber();
                                         }
                                     }
@@ -429,27 +391,88 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                             // TODO: Write the default camera settings to the file.
                             printf("Default Camera Overwritten\n");
                             model.Set(defaultCamera);
-                        }
-                        else if (strcmp(changeRequestItem->key, "meshes") == 0)
-                        {
+                        } else if (strcmp(changeRequestItem->key, "meshes") == 0) {
                             // The meshes will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
-                            for (auto meshTemplates : changeRequestItem->value)
-                            {
+                            for (auto meshTemplates : changeRequestItem->value) {
                                 std::vector<SC::Store::MeshElement> faceMeshElements;
-                                auto meshTemplate = meshTemplates->value.toNode();
-                                // for(auto attribute: attributePair->value){
-                                if (strcmp(meshTemplate->key, "nodeId") == 0)
-                                {
-                                    auto nodeId = (int)meshTemplate->value.toNumber();
-                                    auto parentNodeId = (int)meshTemplate->next->value.toNumber();
-                                    auto meshFacesNode = meshTemplate->next->next;
-                                    ;
-                                    if (strcmp(meshFacesNode->key, "faces") == 0)
-                                    {
-                                        for (auto meshElementFaces : meshFacesNode->value)
-                                        {
+                                for(auto meshTemplate : meshTemplates->value){
+                                    int nodeId, parentNodeId = 0;
+
+                                    SC::Store::Mesh mesh;
+                                    int face_count = 0;
+                                    mesh.flags = (SC::Store::Mesh::Bits)(
+                                        SC::Store::Mesh::ClockwiseWinding | SC::Store::Mesh::FaceNormals | SC::Store::Mesh::FaceRGBA32s | SC::Store::Mesh::LineRGBA32s | SC::Store::Mesh::Manifold);
+
+                                    // for(auto attribute: attributePair->value){
+                                    if (strcmp(meshTemplate->key, "nodeId") == 0) {
+                                        nodeId= (int)meshTemplate->value.toNumber();
+                                    } else if (strcmp(meshTemplate->key, "parentNodeId") == 0) {
+                                        parentNodeId = (int)meshTemplate->value.toNumber();
+                                        
+                                        /*"{\"meshes\":[{\"nodeId\":-64,\"parentNodeId\":-2,\
+                                        "faces\":[{\"position\":[-10,10,10,10,10,10,-10,-10,10,10,10,10,10,-10,10,-10,-10,10,10,10,-10,-10,10,-10,-10,-10,-10,10,10,-10,-10,-10,-10,10,-10,-10,-10,10,-10,10,10,-10,10,10,10,-10,10,-10,10,10,10,-10,10,10,-10,-10,-10,10,-10,10,10,-10,-10,-10,-10,-10,-10,-10,10,10,-10,10,-10,10,-10,-10,10,10,-10,-10,-10,-10,10,10,-10,-10,10,-10,-10,-10,10,10,10,10,10,-10,10,-10,-10,10,10,10,10,-10,-10,10,-10,10]}],\
+                                        "lines\":[],\
+                                        "points\":[]}]}";*/
+                                        
+                                        //"{\"nodeNames\":[{\"nodeId\":0,\"nodeName\":\"HC Node\"},{\"nodeId\":2,\"nodeName\":\"HC Node 2\"}]\"attributes\":[{\"nodeId\":6,\"Material\":\"Inconel\"},{\"nodeId\":4,\"Material\":\"Steel\"},{\"nodeId\":34,\"Material\":\"Wood\"},{\"nodeId\":95,\"Manufacture Date\":\"10/22/2021\"}],\"defaultCamera\":{\"_position\":{\"x\":81.22082242242087,\"y\":-99.85364263567925,\"z\":-14.745490335642312},\"_target\":{\"x\":42.01403360616819,\"y\":28.500000953674316,\"z\":-45.15500047683717},\"_up\":{\"x\":0.014413796198195017,\"y\":0.23468066183916042,\"z\":0.9719656523961587},\"_width\":137.61020125980392,\"_height\":137.61020125980392,\"_projection\":0,\"_nearLimit\":0.01,\"_cameraFlags\":0},\"colors\":[{\"nodeIds\":[8,9,10,11],\"color\":{\"r\":255,\"g\":0,\"b\":0}}],\"colors\":[{\"nodeId\":8,\"color\":{\"r\":0,\"g\":255,\"b\":0}},{\"nodeId\":9,\"color\":{\"r\":0,\"g\":255,\"b\":0}},{\"nodeId\":10,\"color\":{\"r\":0,\"g\":255,\"b\":0}},{\"nodeId\":11,\"color\":{\"r\":0,\"g\":255,\"b\":0}}]}";
+                                    } else if (strcmp(meshTemplate->key, "faces") == 0) {
+                                        auto meshFacesNode = meshTemplate->value.toNode();
+                                        for (auto meshElementFaces : meshFacesNode->value) {
                                             auto faceElementData = meshElementFaces->value.toNode();
                                             bool hasNormals, hasRGBAs, hasUVs;
+
+                                            if (strcmp(meshElementFaces->key, "position") == 0){
+                                                SC::Store::Point points[] = {};
+                                                auto facePoint = meshElementFaces->value.toNode();
+                                                int pointCount = 0;
+                                                int xyzCount = 0;
+                                                float pointX = 0.0f;
+                                                float pointY = 0.0f;
+                                                bool bListComplete = false;
+                                                while(!bListComplete){
+                                                    if(xyzCount == 0){
+                                                        pointX = facePoint->value.toNumber();
+                                                        xyzCount = xyzCount + 1;
+                                                    } else if(xyzCount == 1){
+                                                        pointY = facePoint->value.toNumber();
+                                                        xyzCount = xyzCount + 1;
+                                                    } else {
+                                                        float pointZ = facePoint->value.toNumber();
+                                                        //points.push_back(SC::Store::Point(pointX, pointY, pointZ));
+                                                        points[pointCount] = SC::Store::Point(pointX, pointY, pointZ);
+                                                        pointCount = pointCount + 1;
+                                                        xyzCount = 0;
+                                                    }
+                                                    if(!facePoint->next) bListComplete = true;
+                                                    else facePoint = facePoint->next;
+                                                }
+
+                                                mesh.points = points;
+                                                mesh.point_count = pointCount;
+                                            } else if(strcmp(faceElementData->key, "normals") == 0){
+                                                SC::Store::Normal normals[] = {
+                                                    {0, -1, 0}, // 0
+                                                    {0, 0, 1},  // 1
+                                                    {0, 1, 0},  // 2
+                                                    {0, 0, -1}, // 3
+                                                    {1, 0, 0},  // 4
+                                                    {-1, 0, 0}, // 5
+                                                };
+                                                mesh.normals = normals;
+                                                face_count = 6;
+                                                mesh.normal_count = face_count;
+                                            } else if(strcmp(faceElementData->key, "rgba32s") == 0){
+                                                SC::Store::RGBA32 rgba32s[] = {
+                                                    {255, 0, 0, 255},   // 0
+                                                    {255, 0, 0, 255},   // 1
+                                                    {255, 0, 0, 255},   // 2
+                                                    {255, 0, 0, 255}, // 3
+                                                    {255, 0, 0, 255}, // 4
+                                                    {255, 0, 0, 255}, // 5
+                                                };
+                                                mesh.rgba32s = rgba32s;
+                                                mesh.rgba32_count = 6;
+                                            }
                                             // SC::Store::Mesh faceMesh;
                                             // // faceMesh.flags = SC::Store::Mesh::Bits::
                                             // auto i = 0;
@@ -505,45 +528,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                             // faceMesh.face_elements.push_back(faceElement);
                                             // auto meshKey = model.Insert(faceMesh);
 
-                                            SC::Store::Mesh mesh;
-                                            mesh.flags = (SC::Store::Mesh::Bits)(
-                                                SC::Store::Mesh::ClockwiseWinding | SC::Store::Mesh::FaceNormals | SC::Store::Mesh::FaceRGBA32s | SC::Store::Mesh::LineRGBA32s | SC::Store::Mesh::Manifold);
-
-                                            SC::Store::Point points[] = {
-                                                {-10, -10, 10}, // 0
-                                                {10, -10, 10}, // 1
-                                                {-10, -10, -10}, // 2
-                                                {10, -10, -10}, // 3
-                                                {10, 10, 10}, // 4
-                                                {10, 10, -10}, // 5
-                                                {-10, 10, 10}, // 6
-                                                {-10, 10, -10}, // 7
-                                            };
-                                            mesh.points = points;
-                                            mesh.point_count = 8;
-
-                                            SC::Store::Normal normals[] = {
-                                                {0, -1, 0}, // 0
-                                                {0, 0, 1},  // 1
-                                                {0, 1, 0},  // 2
-                                                {0, 0, -1}, // 3
-                                                {1, 0, 0},  // 4
-                                                {-1, 0, 0}, // 5
-                                            };
-                                            mesh.normals = normals;
-                                            mesh.normal_count = 6;
-
-                                            SC::Store::RGBA32 rgba32s[] = {
-                                                {255, 0, 0, 255},   // 0
-                                                {255, 0, 0, 255},   // 1
-                                                {255, 0, 0, 255},   // 2
-                                                {255, 0, 0, 255}, // 3
-                                                {255, 0, 0, 255}, // 4
-                                                {255, 0, 0, 255}, // 5
-                                            };
-                                            mesh.rgba32s = rgba32s;
-                                            mesh.rgba32_count = 6;
-
+                                            //for(int faceIndex = 0; faceIndex < face_count; faceIndex++)
                                             {
                                                 uint32_t point_indices[] = {0, 1, 3, 2};
                                                 uint32_t normal_index = 0;
@@ -589,11 +574,8 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                         }
                                     }
                                 }
-                                //}
                             }
-                        }
-                        else
-                        {
+                        } else {
                             // Unhandled JSON top level item
                             printf("ERROR: Unknown change insertion in JSON file\n");
                         }

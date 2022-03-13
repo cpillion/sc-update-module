@@ -9,16 +9,18 @@
             "name": "(lldb) Launch libsc sample",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/sample/server/libsc/outputs/libsc_sample",
+            //"program": "${workspaceFolder}/sample/server/libsc/outputs/libsc_sample",
+            "targetArchitecture": "x86_64",
             "args": [
-                "${workspaceFolder}/sample/server/libsc/outputs/modelCache",
+                "${workspaceFolder}/sample/client/public/models",
                 "microengine"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [{ "name": "LD_LIBRARY_PATH", "value": "${workspaceFolder}/sample/server/libsc/bin/macos/" }],
             "externalConsole": false,
-            "MIMode": "lldb"
+            "MIMode": "lldb",
+            "program": "${workspaceFolder}/sample/server/libsc/outputs/libsc_sample.x86_64"
         },
         {
             "type": "pwa-chrome",
