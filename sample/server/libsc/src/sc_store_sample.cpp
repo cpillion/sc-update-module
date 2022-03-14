@@ -582,14 +582,14 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                         }
                                     } else if (strcmp(meshTemplate->key,"isTwoSided") == 0){
                                         /*isTwoSided: meshData.isTwoSided*/
-                                        if(strcmp(meshTemplate->value.toString(),"True") == 0){
+                                        if(meshTemplate->value.toNumber() == 0){
                                             mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::TwoSided);
                                         } else {
                                             mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::Manifold);
                                         }
                                     } else if (strcmp(meshTemplate->key,"isManifold") == 0){
                                         /*isManifold: meshData.isManifold,*/
-                                        if(strcmp(meshTemplate->value.toString(),"True") == 0){
+                                        if(meshTemplate->value.toNumber() == 0){
                                             mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::Manifold);
                                         } else {
                                             mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::Manifold);

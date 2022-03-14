@@ -19,8 +19,7 @@ static bool processMeshPosNormRGBaUV(JsonNode* meshFacesNode, std::vector<SC::St
                     int xyzCount = 0;
                     float pointX = 0.0f;
                     float pointY = 0.0f;
-                    bool bListComplete = false;
-                    while(!bListComplete){
+                    while(facePoint != nullptr){
                         if(xyzCount == 0){
                             pointX = facePoint->value.toNumber();
                             xyzCount = xyzCount + 1;
@@ -32,16 +31,14 @@ static bool processMeshPosNormRGBaUV(JsonNode* meshFacesNode, std::vector<SC::St
                             points.push_back(SC::Store::Point(pointX, pointY, pointZ));
                             xyzCount = 0;
                         }
-                        if(!facePoint->next) bListComplete = true;
-                        else facePoint = facePoint->next;
+                        facePoint = facePoint->next;
                     }
-                } else if(strcmp(faceElementData->key, "normal") == 0){
+                } else if(strcmp(meshElementFaces->key, "normal") == 0){
                     auto faceNormal = meshElementFaces->value.toNode();
                     int xyzCount = 0;
                     float normalX = 0.0f;
                     float normalY = 0.0f;
-                    bool bListComplete = false;
-                    while(!bListComplete){
+                    while(faceNormal != nullptr){
                         if(xyzCount == 0){
                             normalX = faceNormal->value.toNumber();
                             xyzCount = xyzCount + 1;
@@ -53,17 +50,15 @@ static bool processMeshPosNormRGBaUV(JsonNode* meshFacesNode, std::vector<SC::St
                             normals.push_back(SC::Store::Normal(normalX, normalY, normalZ));
                             xyzCount = 0;
                         }
-                        if(!faceNormal->next) bListComplete = true;
-                        else faceNormal = faceNormal->next;
+                        faceNormal = faceNormal->next;
                     }
-                } else if(strcmp(faceElementData->key, "rgba") == 0){
+                } else if(strcmp(meshElementFaces->key, "rgba") == 0){
                     auto faceRGBA32 = meshElementFaces->value.toNode();
                     int rgbaCount = 0;
                     int redGBA = 0;
                     int rGreenBA = 0;
                     int rgBlueA = 0;
-                    bool bListComplete = false;
-                    while(!bListComplete){
+                    while(faceRGBA32 != nullptr){
                         if(rgbaCount == 0){
                             redGBA = faceRGBA32->value.toNumber();
                             rgbaCount = rgbaCount + 1;
@@ -78,15 +73,13 @@ static bool processMeshPosNormRGBaUV(JsonNode* meshFacesNode, std::vector<SC::St
                             rgba32s.push_back(SC::Store::RGBA32(redGBA, rGreenBA, rgBlueA, rgbAlpha));
                             rgbaCount = 0;
                         }
-                        if(!faceRGBA32->next) bListComplete = true;
-                        else faceRGBA32 = faceRGBA32->next;
+                        faceRGBA32 = faceRGBA32->next;
                     }
-                } else if(strcmp(faceElementData->key, "uv") == 0){
+                } else if(strcmp(meshElementFaces->key, "uv") == 0){
                     auto faceUV = meshElementFaces->value.toNode();
                     bool uvalue = true;
                     float uValue = 0.0f;
-                    bool bListComplete = false;
-                    while(!bListComplete){
+                    while(faceUV != nullptr){
                         if(uvalue){
                             uValue = faceUV->value.toNumber();
                             uvalue = false;
@@ -95,8 +88,7 @@ static bool processMeshPosNormRGBaUV(JsonNode* meshFacesNode, std::vector<SC::St
                             uvs.push_back(SC::Store::UV(uValue, vValue));
                             uvalue = true;
                         }
-                        if(!faceUV->next) bListComplete = true;
-                        else faceUV = faceUV->next;
+                        faceUV = faceUV->next;
                     }
                 }
             }
