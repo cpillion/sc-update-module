@@ -16,7 +16,7 @@
 }
 
 .App-header {
-  background-color: #000000;
+  background-color: #022437;
   min-height: 16vh;
   display: flex;
   flex-direction: column;
@@ -87,13 +87,12 @@ html, body {
 
 .uiToolbar  {
   /* margin: 1%; */
-  float: left;
-  width: 60%;
+  float: right;
+  width: 52%;
   height: 45%;
   /* left: 7vw; */
   /* position: relative; */
   /* margin: 3vh; */
-  overflow-y: ;
 }
 
 .uiToolbar button {
@@ -101,13 +100,14 @@ html, body {
   margin-bottom: 2%;
   border-radius: 5px;
   font: small Inconsolata, monospace;
-  height: auto;
+  font-size: calc(2px + 1vmin);
+  height: 2.5em;
 }
 
 .uiToolbar input {
   /* margin: 0.5vh; */
   border-radius: 5px;
-  height: 10%;
+  height: 2.5em;
   vertical-align: middle;
 }
 
@@ -146,12 +146,12 @@ html, body {
     rgba(28, 154, 213, 0.75), black 120%
   );
   height: 48%;
-  width: 35%;
+  width: 45%;
   color: white;
   font: small Inconsolata, monospace;
   text-shadow: 0 0 5px #C8C8C8;
-  float: right;
-  margin-bottom: 1em;
+  float: left;
+  margin-bottom: 2vh;
   /* padding: 1%; */
   position: relative;
   border-radius: 5px;
