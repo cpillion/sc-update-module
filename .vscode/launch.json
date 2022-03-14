@@ -3,7 +3,7 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
+    "configurations": [    
         {
             "name": "(lldb) Launch libsc sample",
             "type": "cppdbg",
@@ -22,11 +22,35 @@
             "program": "${workspaceFolder}/sample/server/libsc/outputs/libsc_sample.x86_64"
         },
         {
+            "name": "(lldb) Attach libsc server",
+            "type": "cppdbg",
+            "request": "attach",
+            "processId": "${command:pickProcess}",
+            "targetArchitecture": "x86_64",
+            "args": [
+                "${workspaceFolder}/sample/client/public/models",
+                "microengine"
+            ],
+            "stopAtEntry": true,
+            "cwd": "${fileDirname}",
+            "environment": [{ "name": "LD_LIBRARY_PATH", "value": "${workspaceFolder}/sample/server/libsc/bin/macos/" }],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "program": "${workspaceFolder}/sample/server/libsc/outputs/libsc_sample.x86_64"
+        },
+        {
             "type": "pwa-chrome",
             "request": "launch",
             "name": "Launch Chrome against localhost",
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}"
-        }
+        }, 
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Express Server",
+            "autoAttachChildProcesses": true,
+            "program": "${workspaceFolder}/sample/server/app-server.js"
+        }, 
     ]
 }

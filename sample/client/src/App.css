@@ -8,7 +8,7 @@
   animation: App-logo-spin infinite 20s linear;
   height: 6vmin;
   pointer-events: none;
-  padding-top: 1vh;
+  padding-top: 1%;
 }
 
 .App-logo-name {
@@ -16,7 +16,9 @@
 }
 
 .App-header {
-  background-color: #000000;
+  background-color: #022437;
+  /* background-color: black; */
+  background-image: radial-gradient(#022437, rgba(28, 154, 213, 0.75) 350%);
   min-height: 16vh;
   display: flex;
   flex-direction: column;
@@ -42,16 +44,16 @@
 
 #hoops-container {
   position: relative;
-  width: 41vw;
-  height: 100%;
-  float:left;
+  width: 40%;
+  height: 94%;
+  float: left;
+  margin: 1%;
 }
 
 #scUpdateContainer {
   position: relative;
   background-color: lightslategray;
-  padding: 2vh;
-  height: 80vh;
+  height: 84vh;
 }
 
 #canvas {
@@ -67,7 +69,8 @@
   height: 100%;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
 }
@@ -79,91 +82,100 @@ html, body {
   /* height: 1vh; */
   /* float: left; */
   float: left;
-  width: 53vw;
-  margin-left: 2vw;
+  width: 56%;
+  margin-left: 2%;
+  height: 94%;
+  margin: 1%;
 }
 
-.uiToolbar  {
-  /* margin: 2vh; */
-  /* float: left; */
-  /* width: 52vw; */
+.uiToolbar {
+  /* margin: 1%; */
+  float: right;
+  width: 52%;
+  height: 45%;
   /* left: 7vw; */
   /* position: relative; */
   /* margin: 3vh; */
 }
 
 .uiToolbar button {
-  margin: 0.5vw;
+  /* margin-right: 25%; */
+  margin-bottom: 2.5%;
   border-radius: 5px;
   font: small Inconsolata, monospace;
-  height: 3vh;
+  font-size: calc(2px + 1vmin);
+  height: 2.5em;
+  background-color: #94a2af;
+  display: flex;
+  align-items: center;
 }
 
 .uiToolbar input {
-  margin: 0.5vh;
+  /* margin: 0.5vh; */
   border-radius: 5px;
-  height: 3vh;
+  margin-bottom: 2%;
+  height: 2.5em;
   vertical-align: middle;
+  background-color: #94a2af;
 }
 
 .terminal {
   background-color: black;
-  background-image: radial-gradient(
-    rgba(0, 150, 0, 0.75), black 120%
-  );
-  height: 35vh;
+  background-image: radial-gradient(rgba(28, 154, 213, 0.75), black 120%);
+  height: 50%;
   width: 100%;
   color: white;
   font: small Inconsolata, monospace;
-  text-shadow: 0 0 5px #C8C8C8;
+  text-shadow: 0 0 5px #c8c8c8;
   float: right;
-  margin-top: 2vh;
-  padding-top: 1vh;
+  /* margin-top: 2%; */
+  /* padding-top: 2.5%; */
   position: relative;
   border-radius: 5px;
   overflow-y: scroll;
   overflow-x: scroll;
-  display: flex;
-  flex-direction: column;
+  /* display: flex;
+  flex-direction: column; */
   white-space: nowrap;
 }
 
 .terminal p {
-  margin: .1vw 1vh .1vw 1vh;
-  padding-top: 0;
-  padding-left: 1vh;
+  margin: 0.1vw 1vh 0.1vw 1vh;
+  padding-top: 0.5%;
+  padding-left: 1%;
 }
-
 
 .json-terminal {
   background-color: black;
-  background-image: radial-gradient(
-    rgba(0, 150, 0, 0.75), black 120%
-  );
-  height: 35vh;
-  width: 100%;
+  background-image: radial-gradient(rgba(28, 154, 213, 0.75), black 120%);
+  height: 48%;
+  width: 45%;
   color: white;
   font: small Inconsolata, monospace;
-  text-shadow: 0 0 5px #C8C8C8;
-  float: right;
-  margin-top: 2vh;
-  /* padding: 3vh; */
+  text-shadow: 0 0 5px #c8c8c8;
+  float: left;
+  margin-bottom: 2vh;
+  /* padding: 1%; */
   position: relative;
   border-radius: 5px;
   overflow-y: scroll;
   overflow-x: scroll;
-  display: flex;
-  flex-direction: column;
+  /* display: flex;
+  flex-direction: column; */
   /* white-space: nowrap; */
 }
 
-/* .json-terminal text {
-  padding-top: .1vh;
-  padding-left: 1vh;
-} */
+.json-terminal p {
+  margin: 0.1vw 1vh 0.1vw 1vh;
+  padding: 1%;
+}
 
+pre {
+  margin: 0;
+}
 
 ::-webkit-scrollbar {
-    width: 0;  /* Remove scrollbar space */
-    background: transparent;  /* Optional: just make scrollbar invisible */
+  width: 0; /* Remove scrollbar space */
+  height: 0;
+  background: transparent; /* Optional: just make scrollbar invisible */
 }
