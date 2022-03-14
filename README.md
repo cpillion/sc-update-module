@@ -1,5 +1,6 @@
 # sc-update-module
 Sample framework that hooks into HOOPS Communicator and allows for client-side updates to stream cache models
+![image](https://user-images.githubusercontent.com/21211945/158120133-15eb6450-5bf7-400d-83e8-cb51c6001f63.png)
 
 
 ## Project setup
