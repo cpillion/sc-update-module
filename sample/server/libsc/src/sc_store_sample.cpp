@@ -9,6 +9,7 @@
 #include "sc_store.h"
 #include "sc_assemblytree.h"
 #include <gason.h>
+#include "sc_json_helper.h"
 
 #if 0
 #include "tc_io.h"
@@ -226,43 +227,7 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                             // The colors will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
                             for (auto colors : changeRequestItem->value) {
                                 auto colorNode = colors->value.toNode();
-                                if (strcmp(colorNode->key, "nodeIds") == 0) {
-                                    // auto color = colorNode->next;
-                                    // if (strcmp(color->key, "color") == 0)
-                                    // {
-                                    //     for (auto rgbValues : color->value)
-                                    //     {
-                                    //         if (strcmp(rgbValues->key, "r") == 0)
-                                    //         {
-                                    //             red = (int)rgbValues->value.toNumber();
-                                    //         }
-                                    //         else if (strcmp(rgbValues->key, "g") == 0)
-                                    //         {
-                                    //             green = (int)rgbValues->value.toNumber();
-                                    //         }
-                                    //         else if (strcmp(rgbValues->key, "b") == 0)
-                                    //         {
-                                    //             blue = (int)rgbValues->value.toNumber();
-                                    //         }
-                                    //     }
-                                    // }
-
-                                    // if (colorNode->value.getTag() == JSON_ARRAY)
-                                    // {
-                                    //     for (auto nodeIdsItem : colorNode->value)
-                                    //     {
-                                    //         // TODO publish color update.
-                                    //         auto nodeId = (int)nodeIdsItem->value.toNumber();
-                                    //         auto material = SC::Store::Material(SC::Store::Color(red, green, blue, 1.0));
-                                    //         auto materialKey = model.Insert(material);
-                                    //         if (!assembly_tree.SetNodeMaterial(nodeId, material))
-                                    //         {
-                                    //             printf("ERROR: Failed to set color on node %i . \n", nodeId);
-                                    //         }
-                                    //     }
-                                    // }
-                                    printf("We don't process nodeIds");
-                                } else if (strcmp(colorNode->key, "nodeId") == 0) {
+                                if (strcmp(colorNode->key, "nodeId") == 0) {
                                     auto color = colorNode->next;
                                     if (strcmp(color->key, "color") == 0) {
                                         for (auto rgbValues : color->value) {
@@ -392,14 +357,15 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                             printf("Default Camera Overwritten\n");
                             model.Set(defaultCamera);
                         } else if (strcmp(changeRequestItem->key, "meshes") == 0) {
+                            SC::Store::Mesh mesh;
+                            int nodeId, parentNodeId = 0;
+
                             // The meshes will always be stored in an array so access the array in the "value" of the first child and then get the node of the array
                             for (auto meshTemplates : changeRequestItem->value) {
                                 std::vector<SC::Store::MeshElement> faceMeshElements;
+                                auto meshTemplate = meshTemplates->value;
                                 for(auto meshTemplate : meshTemplates->value){
-                                    int nodeId, parentNodeId = 0;
-
-                                    SC::Store::Mesh mesh;
-                                    int face_count = 0;
+                                    // Set the default, if any values change, we will update them in the code below...
                                     mesh.flags = (SC::Store::Mesh::Bits)(
                                         SC::Store::Mesh::ClockwiseWinding | SC::Store::Mesh::FaceNormals | SC::Store::Mesh::FaceRGBA32s | SC::Store::Mesh::LineRGBA32s | SC::Store::Mesh::Manifold);
 
@@ -407,174 +373,237 @@ int StoreSample(const std::string &model_output_path, const std::string &model_n
                                     if (strcmp(meshTemplate->key, "nodeId") == 0) {
                                         nodeId= (int)meshTemplate->value.toNumber();
                                     } else if (strcmp(meshTemplate->key, "parentNodeId") == 0) {
-                                        parentNodeId = (int)meshTemplate->value.toNumber();
-                                        
-                                        /*"{\"meshes\":[{\"nodeId\":-64,\"parentNodeId\":-2,\
-                                        "faces\":[{\"position\":[-10,10,10,10,10,10,-10,-10,10,10,10,10,10,-10,10,-10,-10,10,10,10,-10,-10,10,-10,-10,-10,-10,10,10,-10,-10,-10,-10,10,-10,-10,-10,10,-10,10,10,-10,10,10,10,-10,10,-10,10,10,10,-10,10,10,-10,-10,-10,10,-10,10,10,-10,-10,-10,-10,-10,-10,-10,10,10,-10,10,-10,10,-10,-10,10,10,-10,-10,-10,-10,10,10,-10,-10,10,-10,-10,-10,10,10,10,10,10,-10,10,-10,-10,10,10,10,10,-10,-10,10,-10,10]}],\
-                                        "lines\":[],\
-                                        "points\":[]}]}";*/
-                                        
-                                        //"{\"nodeNames\":[{\"nodeId\":0,\"nodeName\":\"HC Node\"},{\"nodeId\":2,\"nodeName\":\"HC Node 2\"}]\"attributes\":[{\"nodeId\":6,\"Material\":\"Inconel\"},{\"nodeId\":4,\"Material\":\"Steel\"},{\"nodeId\":34,\"Material\":\"Wood\"},{\"nodeId\":95,\"Manufacture Date\":\"10/22/2021\"}],\"defaultCamera\":{\"_position\":{\"x\":81.22082242242087,\"y\":-99.85364263567925,\"z\":-14.745490335642312},\"_target\":{\"x\":42.01403360616819,\"y\":28.500000953674316,\"z\":-45.15500047683717},\"_up\":{\"x\":0.014413796198195017,\"y\":0.23468066183916042,\"z\":0.9719656523961587},\"_width\":137.61020125980392,\"_height\":137.61020125980392,\"_projection\":0,\"_nearLimit\":0.01,\"_cameraFlags\":0},\"colors\":[{\"nodeIds\":[8,9,10,11],\"color\":{\"r\":255,\"g\":0,\"b\":0}}],\"colors\":[{\"nodeId\":8,\"color\":{\"r\":0,\"g\":255,\"b\":0}},{\"nodeId\":9,\"color\":{\"r\":0,\"g\":255,\"b\":0}},{\"nodeId\":10,\"color\":{\"r\":0,\"g\":255,\"b\":0}},{\"nodeId\":11,\"color\":{\"r\":0,\"g\":255,\"b\":0}}]}";
+                                        parentNodeId = (int)meshTemplate->value.toNumber();                                        
                                     } else if (strcmp(meshTemplate->key, "faces") == 0) {
-                                        auto meshFacesNode = meshTemplate->value.toNode();
-                                        for (auto meshElementFaces : meshFacesNode->value) {
-                                            auto faceElementData = meshElementFaces->value.toNode();
-                                            bool hasNormals, hasRGBAs, hasUVs;
-
-                                            if (strcmp(meshElementFaces->key, "position") == 0){
-                                                SC::Store::Point points[] = {};
-                                                auto facePoint = meshElementFaces->value.toNode();
-                                                int pointCount = 0;
-                                                int xyzCount = 0;
-                                                float pointX = 0.0f;
-                                                float pointY = 0.0f;
-                                                bool bListComplete = false;
-                                                while(!bListComplete){
-                                                    if(xyzCount == 0){
-                                                        pointX = facePoint->value.toNumber();
-                                                        xyzCount = xyzCount + 1;
-                                                    } else if(xyzCount == 1){
-                                                        pointY = facePoint->value.toNumber();
-                                                        xyzCount = xyzCount + 1;
-                                                    } else {
-                                                        float pointZ = facePoint->value.toNumber();
-                                                        //points.push_back(SC::Store::Point(pointX, pointY, pointZ));
-                                                        points[pointCount] = SC::Store::Point(pointX, pointY, pointZ);
-                                                        pointCount = pointCount + 1;
-                                                        xyzCount = 0;
+                                        /*
+                                            faces: meshElementData = {
+                                                        position: [],
+                                                        normal: [],
+                                                        rgba: [],
+                                                        uv: [],
                                                     }
-                                                    if(!facePoint->next) bListComplete = true;
-                                                    else facePoint = facePoint->next;
-                                                }
+                                            }*/
+                                        auto meshFacesNode = meshTemplate->value.toNode();
 
-                                                mesh.points = points;
-                                                mesh.point_count = pointCount;
-                                            } else if(strcmp(faceElementData->key, "normals") == 0){
-                                                SC::Store::Normal normals[] = {
-                                                    {0, -1, 0}, // 0
-                                                    {0, 0, 1},  // 1
-                                                    {0, 1, 0},  // 2
-                                                    {0, 0, -1}, // 3
-                                                    {1, 0, 0},  // 4
-                                                    {-1, 0, 0}, // 5
-                                                };
-                                                mesh.normals = normals;
-                                                face_count = 6;
-                                                mesh.normal_count = face_count;
-                                            } else if(strcmp(faceElementData->key, "rgba32s") == 0){
-                                                SC::Store::RGBA32 rgba32s[] = {
-                                                    {255, 0, 0, 255},   // 0
-                                                    {255, 0, 0, 255},   // 1
-                                                    {255, 0, 0, 255},   // 2
-                                                    {255, 0, 0, 255}, // 3
-                                                    {255, 0, 0, 255}, // 4
-                                                    {255, 0, 0, 255}, // 5
-                                                };
-                                                mesh.rgba32s = rgba32s;
-                                                mesh.rgba32_count = 6;
-                                            }
-                                            // SC::Store::Mesh faceMesh;
-                                            // // faceMesh.flags = SC::Store::Mesh::Bits::
-                                            // auto i = 0;
-                                            // auto pointCount = 0;
-                                            // std::vector<SC::Store::Point> vertices = {};
-                                            // for (auto position : faceElementData->value)
-                                            // {
-                                            //     SC::Store::Point vertex;
-                                            //     switch (i)
-                                            //     {
-                                            //     case 0:
-                                            //         vertex.x = position->value.toNumber();
-                                            //         i++;
-                                            //         break;
-                                            //     case 1:
-                                            //         vertex.y = position->value.toNumber();
-                                            //         i++;
-                                            //         break;
-                                            //     case 2:
-                                            //         vertex.z = position->value.toNumber();
-                                            //         i = 0;
-                                            //         vertices.push_back(vertex);
-                                            //         pointCount++;
-                                            //         break;
-                                            //     }
-                                            // }
-                                            // faceMesh.point_count = pointCount;
-                                            // SC::Store::Point *points = &vertices[0];
-                                            // faceMesh.points = points;
-                                            // SC::Store::MeshElement faceElement;
-                                            // std::vector<SC::Store::NodeId> indices =
-                                            //     {
-                                            //         // front
-                                            //         0, 1, 3,
-                                            //         1, 2, 3,
-                                            //         // back
-                                            //         4, 5, 7,
-                                            //         5, 6, 7,
-                                            //         // right
-                                            //         0, 1, 4,
-                                            //         1, 4, 5,
-                                            //         // left
-                                            //         2, 3, 7,
-                                            //         2, 6, 7,
-                                            //         // top
-                                            //         0, 3, 4,
-                                            //         3, 4, 7,
-                                            //         // bottom
-                                            //         1, 2, 5,
-                                            //         2, 5, 6
-                                            // };
-                                            // faceElement.indices = indices;
-                                            // faceMesh.face_elements.push_back(faceElement);
-                                            // auto meshKey = model.Insert(faceMesh);
+                                        std::vector<SC::Store::Point> points;
+                                        std::vector<SC::Store::Normal> normals;
+                                        std::vector<SC::Store::RGBA32> rgba32s;
+                                        std::vector<SC::Store::UV> uvs;
+                                        int point_count, normal_count, rgba_count, uv_count = 0;
+                                        bool processed = processMeshPosNormRGBaUV(meshFacesNode, points, normals, rgba32s, uvs);
 
-                                            //for(int faceIndex = 0; faceIndex < face_count; faceIndex++)
-                                            {
-                                                uint32_t point_indices[] = {0, 1, 3, 2};
-                                                uint32_t normal_index = 0;
-                                                uint32_t rgba32_index = 0;
-                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                        if(points.size()){
+                                            SC::Store::Point points_arr[points.size()];
+                                            int point_count = 0;
+                                            for(auto point : points){
+                                                points_arr[point_count] = point;
+                                                point_count++;
                                             }
-                                            {
-                                                uint32_t point_indices[] = {6, 4, 1, 0};
-                                                uint32_t normal_index = 1;
-                                                uint32_t rgba32_index = 1;
-                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            mesh.points = points_arr;
+                                            mesh.point_count = point_count;
+                                        }
+
+                                        if(normals.size()){
+                                            SC::Store::Normal normals_arr[normals.size()];
+                                            int normals_count = 0;
+                                            for(auto normal : normals){
+                                                normals_arr[normals_count] = normal;
+                                                normals_count++;
                                             }
-                                            {
-                                                uint32_t point_indices[] = {7, 5, 4, 6};
-                                                uint32_t normal_index = 2;
-                                                uint32_t rgba32_index = 2;
-                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            mesh.normals = normals_arr;
+                                            mesh.normal_count = normal_count;
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::FaceNormals);
+                                        } else mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::FaceNormals);
+
+                                        if(rgba32s.size()){
+                                            SC::Store::RGBA32 rgba32s_arr[rgba32s.size()];
+                                            int rgba32s_count = 0;
+                                            for(auto rgba32 : rgba32s){
+                                                rgba32s_arr[rgba32s_count] = rgba32;
+                                                rgba32s_count++;
                                             }
-                                            {
-                                                uint32_t point_indices[] = {2, 3, 5, 7};
-                                                uint32_t normal_index = 3;
-                                                uint32_t rgba32_index = 3;
-                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            mesh.rgba32s = rgba32s_arr;
+                                            mesh.rgba32_count = rgba32s_count;
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::FaceRGBA32s);
+                                        } else mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::FaceRGBA32s);
+
+                                        if(uvs.size()){
+                                            SC::Store::UV uvs_arr[uvs.size()];
+                                            int uvs_count = 0;
+                                            for(auto uv : uvs){
+                                                uvs_arr[uvs_count] = uv;
+                                                uvs_count++;
                                             }
-                                            {
-                                                uint32_t point_indices[] = {1, 4, 5, 3};
-                                                uint32_t normal_index = 4;
-                                                uint32_t rgba32_index = 4;
-                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            mesh.uvs = uvs_arr;
+                                            mesh.uv_count = uvs_count;
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::FaceUVs);
+                                        } else mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::FaceUVs);
+
+                                    } else if (strcmp(meshTemplate->key, "lines") == 0) {
+                                        /*
+                                            lines: meshElementData = {
+                                                        position: [],
+                                                        normal: [],
+                                                        rgba: [],
+                                                        uv: [],
+                                                    },
+                                            }*/
+                                        auto meshFacesNode = meshTemplate->value.toNode();
+                                        std::vector<SC::Store::Point> points;
+                                        std::vector<SC::Store::Normal> normals;
+                                        std::vector<SC::Store::RGBA32> rgba32s;
+                                        std::vector<SC::Store::UV> uvs;
+                                        int point_count, normal_count, rgba_count, uv_count = 0;
+                                        bool processed = processMeshPosNormRGBaUV(meshFacesNode, points, normals, rgba32s, uvs);
+
+                                        if(points.size()){
+                                            SC::Store::Point points_arr[points.size()];
+                                            int point_count = 0;
+                                            for(auto point : points){
+                                                points_arr[point_count] = point;
+                                                point_count++;
                                             }
-                                            {
-                                                uint32_t point_indices[] = {6, 0, 2, 7};
-                                                uint32_t normal_index = 5;
-                                                uint32_t rgba32_index = 5;
-                                                AddSquareFace(mesh, point_indices, normal_index, rgba32_index);
+                                            mesh.points = points_arr;
+                                            mesh.point_count = point_count;
+                                        }
+
+                                        if(normals.size()){
+                                            SC::Store::Normal normals_arr[normals.size()];
+                                            int normals_count = 0;
+                                            for(auto normal : normals){
+                                                normals_arr[normals_count] = normal;
+                                                normals_count++;
                                             }
-                                            auto meshKey = model.Insert(mesh);
-                                            auto instanceKey = model.Instance(meshKey);
-                                            SC::Store::NodeId childNodeId = nodeId;
-                                            SC::Store::NodeId bodyInstanceNode = 0;
-                                            assembly_tree.CreateChild(parentNodeId, childNodeId);
-                                            assembly_tree.CreateAndAddBodyInstance(childNodeId, bodyInstanceNode);
+                                            mesh.normals = normals_arr;
+                                            mesh.normal_count = normal_count;
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::LineNormals);
+                                        } else mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::LineNormals);
+
+                                        if(rgba32s.size()){
+                                            SC::Store::RGBA32 rgba32s_arr[rgba32s.size()];
+                                            int rgba32s_count = 0;
+                                            for(auto rgba32 : rgba32s){
+                                                rgba32s_arr[rgba32s_count] = rgba32;
+                                                rgba32s_count++;
+                                            }
+                                            mesh.rgba32s = rgba32s_arr;
+                                            mesh.rgba32_count = rgba32s_count;
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::LineRGBA32s);
+                                        } else mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::LineRGBA32s);
+
+                                        if(uvs.size()){
+                                            SC::Store::UV uvs_arr[uvs.size()];
+                                            int uvs_count = 0;
+                                            for(auto uv : uvs){
+                                                uvs_arr[uvs_count] = uv;
+                                                uvs_count++;
+                                            }
+                                            mesh.uvs = uvs_arr;
+                                            mesh.uv_count = uvs_count;
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::LineUVs);
+                                        } else mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::LineUVs);
+
+                                        // TODO: Add lines...?
+                                    } else if (strcmp(meshTemplate->key, "points") == 0){
+                                        /*
+                                            points: meshElementData = {
+                                                        position: [],
+                                                        normal: [],
+                                                        rgba: [],
+                                                        uv: [],
+                                                    },
+                                            }*/
+                                        auto meshFacesNode = meshTemplate->value.toNode();
+                                        std::vector<SC::Store::Point> points;
+                                        std::vector<SC::Store::Normal> normals;
+                                        std::vector<SC::Store::RGBA32> rgba32s;
+                                        std::vector<SC::Store::UV> uvs;
+                                        int point_count, normal_count, rgba_count, uv_count = 0;
+                                        bool processed = processMeshPosNormRGBaUV(meshFacesNode, points, normals, rgba32s, uvs);
+
+                                        if(points.size()){
+                                            SC::Store::Point points_arr[points.size()];
+                                            int point_count = 0;
+                                            for(auto point : points){
+                                                points_arr[point_count] = point;
+                                                point_count++;
+                                            }
+                                            mesh.points = points_arr;
+                                            mesh.point_count = point_count;
+                                        }
+
+                                        if(normals.size()){
+                                            SC::Store::Normal normals_arr[normals.size()];
+                                            int normals_count = 0;
+                                            for(auto normal : normals){
+                                                normals_arr[normals_count] = normal;
+                                                normals_count++;
+                                            }
+                                            mesh.normals = normals_arr;
+                                            mesh.normal_count = normal_count;
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::PointNormals);
+                                        } else mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::PointNormals);
+
+                                        if(rgba32s.size()){
+                                            SC::Store::RGBA32 rgba32s_arr[rgba32s.size()];
+                                            int rgba32s_count = 0;
+                                            for(auto rgba32 : rgba32s){
+                                                rgba32s_arr[rgba32s_count] = rgba32;
+                                                rgba32s_count++;
+                                            }
+                                            mesh.rgba32s = rgba32s_arr;
+                                            mesh.rgba32_count = rgba32s_count;
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::PointRGBA32s);
+                                        } else mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::PointRGBA32s);
+
+                                        if(uvs.size()){
+                                            SC::Store::UV uvs_arr[uvs.size()];
+                                            int uvs_count = 0;
+                                            for(auto uv : uvs){
+                                                uvs_arr[uvs_count] = uv;
+                                                uvs_count++;
+                                            }
+                                            mesh.uvs = uvs_arr;
+                                            mesh.uv_count = uvs_count;
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::PointUVs);
+                                        } else mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::PointUVs);
+                                        // TODO: Add Points...?
+
+                                    } else if (strcmp(meshTemplate->key,"winding") == 0){
+                                        /*winding: meshData.winding*/
+                                        if(strcmp(meshTemplate->value.toString(),"clockwise") == 0){
+                                            // Add clockwise bit and remove counter clockwise bit...
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::ClockwiseWinding);
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::CounterClockwiseWinding);
+                                        } else {
+                                            // Add Counter clockwise bit and remove clockwise bit...
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::CounterClockwiseWinding);
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::ClockwiseWinding);
+                                        }
+                                    } else if (strcmp(meshTemplate->key,"isTwoSided") == 0){
+                                        /*isTwoSided: meshData.isTwoSided*/
+                                        if(strcmp(meshTemplate->value.toString(),"True") == 0){
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::TwoSided);
+                                        } else {
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::Manifold);
+                                        }
+                                    } else if (strcmp(meshTemplate->key,"isManifold") == 0){
+                                        /*isManifold: meshData.isManifold,*/
+                                        if(strcmp(meshTemplate->value.toString(),"True") == 0){
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags | SC::Store::Mesh::Bits::Manifold);
+                                        } else {
+                                            mesh.flags = (SC::Store::Mesh::Bits) (mesh.flags & ~SC::Store::Mesh::Bits::Manifold);
                                         }
                                     }
                                 }
                             }
+                            //Process the mesh at the end here.
+                            auto meshKey = model.Insert(mesh);
+                            auto instanceKey = model.Instance(meshKey);
+                            SC::Store::NodeId childNodeId = nodeId;
+                            SC::Store::NodeId bodyInstanceNode = 0;
+                            assembly_tree.CreateChild(parentNodeId, childNodeId);
+                            assembly_tree.CreateAndAddBodyInstance(childNodeId, bodyInstanceNode);
                         } else {
                             // Unhandled JSON top level item
                             printf("ERROR: Unknown change insertion in JSON file\n");
