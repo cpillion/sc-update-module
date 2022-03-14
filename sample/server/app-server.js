@@ -19,12 +19,15 @@ const { spawn } = require('child_process');
 
 io.on('connection', (socket) => {
   console.log(`Connection to Client established.`);
+  let libscModel;
+  socket.emit('syncModel')
+
 
   socket.on('sc_update_to_author', (libSCdataJSON) => {
     console.log(libSCdataJSON);
     const child = spawn(
       path.join(__dirname, 'libsc/outputs/libsc_sample.x86_64'),
-      [path.join(__dirname, 'libsc/outputs/modelCache'), 'microengine', libSCdataJSON],
+      [path.join(__dirname, 'libsc/outputs/modelCache'), libscModel, libSCdataJSON],
       {
         env: { LD_LIBRARY_PATH: path.join(__dirname, '/libsc/bin/macos/') },
       }
@@ -51,6 +54,11 @@ io.on('connection', (socket) => {
       socket.emit('libscstdout', lineBuffer);
     });
   });
+
+  socket.on('setModel', (modelname) => {
+    libscModel = modelname;
+  });
+
 
   // Probably want to send over the model name we are working with too, so we can
   // locate it in the cache. Working with one model now, but could have multiple

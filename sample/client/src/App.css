@@ -17,6 +17,8 @@
 
 .App-header {
   background-color: #022437;
+  /* background-color: black; */
+  background-image: radial-gradient(#022437, rgba(28, 154, 213, 0.75) 350%);
   min-height: 16vh;
   display: flex;
   flex-direction: column;
@@ -44,8 +46,8 @@
   position: relative;
   width: 40%;
   height: 94%;
-  float:left;
-  margin: 1%
+  float: left;
+  margin: 1%;
 }
 
 #scUpdateContainer {
@@ -67,7 +69,8 @@
   height: 100%;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
 }
@@ -82,10 +85,10 @@ html, body {
   width: 56%;
   margin-left: 2%;
   height: 94%;
-  margin: 1%
+  margin: 1%;
 }
 
-.uiToolbar  {
+.uiToolbar {
   /* margin: 1%; */
   float: right;
   width: 52%;
@@ -96,31 +99,34 @@ html, body {
 }
 
 .uiToolbar button {
-  margin-right: 30%;
-  margin-bottom: 2%;
+  /* margin-right: 25%; */
+  margin-bottom: 2.5%;
   border-radius: 5px;
   font: small Inconsolata, monospace;
   font-size: calc(2px + 1vmin);
   height: 2.5em;
+  background-color: #94a2af;
+  display: flex;
+  align-items: center;
 }
 
 .uiToolbar input {
   /* margin: 0.5vh; */
   border-radius: 5px;
+  margin-bottom: 2%;
   height: 2.5em;
   vertical-align: middle;
+  background-color: #94a2af;
 }
 
 .terminal {
   background-color: black;
-  background-image: radial-gradient(
-    rgba(28, 154, 213, 0.75), black 120%
-  );
+  background-image: radial-gradient(rgba(28, 154, 213, 0.75), black 120%);
   height: 50%;
   width: 100%;
   color: white;
   font: small Inconsolata, monospace;
-  text-shadow: 0 0 5px #C8C8C8;
+  text-shadow: 0 0 5px #c8c8c8;
   float: right;
   /* margin-top: 2%; */
   /* padding-top: 2.5%; */
@@ -134,22 +140,19 @@ html, body {
 }
 
 .terminal p {
-  margin: .1vw 1vh .1vw 1vh;
+  margin: 0.1vw 1vh 0.1vw 1vh;
   padding-top: 0.5%;
   padding-left: 1%;
 }
 
-
 .json-terminal {
   background-color: black;
-  background-image: radial-gradient(
-    rgba(28, 154, 213, 0.75), black 120%
-  );
+  background-image: radial-gradient(rgba(28, 154, 213, 0.75), black 120%);
   height: 48%;
   width: 45%;
   color: white;
   font: small Inconsolata, monospace;
-  text-shadow: 0 0 5px #C8C8C8;
+  text-shadow: 0 0 5px #c8c8c8;
   float: left;
   margin-bottom: 2vh;
   /* padding: 1%; */
@@ -163,7 +166,7 @@ html, body {
 }
 
 .json-terminal p {
-  margin: .1vw 1vh .1vw 1vh;
+  margin: 0.1vw 1vh 0.1vw 1vh;
   padding: 1%;
 }
 
@@ -171,9 +174,8 @@ pre {
   margin: 0;
 }
 
-
 ::-webkit-scrollbar {
-    width: 0;  /* Remove scrollbar space */
-    height: 0;
-    background: transparent;  /* Optional: just make scrollbar invisible */
+  width: 0; /* Remove scrollbar space */
+  height: 0;
+  background: transparent; /* Optional: just make scrollbar invisible */
 }

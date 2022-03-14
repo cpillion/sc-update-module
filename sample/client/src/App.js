@@ -20,7 +20,7 @@ function App() {
           HOOPS Communicator Documentation
         </a> */}
       </header>
-      <Hoops/>
+      <Hoops modelname="_MOTO_X"/>
     </div>
   );
 }

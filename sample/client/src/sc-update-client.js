@@ -1,10 +1,15 @@
 import io from 'socket.io-client';
 
 export default class scUpdate {
-  constructor(libScServerEndpoint) {
+  constructor(libScServerEndpoint, modelname) {
     this.scChanges = {};
     this.socket = io(libScServerEndpoint, { transports: ['websocket'] });
+    this.modelToUpdate = modelname;
+    this.socket.emit('setModel', modelname);
 
+    this.socket.on('syncModel', () => {
+      this.socket.emit('setModel', modelname);
+    })
     // Socket.io error info for debugging
     this.socket.on('connect_error', (err) => {
       console.log(`connect_error due to ${err.message}`);

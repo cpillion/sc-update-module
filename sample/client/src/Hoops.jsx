@@ -5,12 +5,13 @@ import scUpdate from './sc-update-client';
 import Communicator from 'communicator';
 
 class Hoops extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = { hwvInstantiated: false, libScStdOut: [] };
     this._viewer = undefined;
+    this._modelname = this.props.modelname;
     this._hwvManager = new ViewerManager();
-    this.scUpdate = new scUpdate('http://localhost:5000');
+    this.scUpdate = new scUpdate('http://localhost:5000', this._modelname);
     this.scUpdate.getSocketControl().on('libscstdout', (outputStream) => {
       this.setState((state, props) => {
         return { 
@@ -22,7 +23,7 @@ class Hoops extends React.Component {
 
   // Once the element is in the browser DOM, initialize the viewer and set up sockets
   componentDidMount() {
-    this._hwvManager.createViewer('canvas', null, 'microengine').then((viewer) => {
+    this._hwvManager.createViewer('canvas', null, this._modelname).then((viewer) => {
       this._viewer = viewer;
       // Once the viewer is instantiated, we can set the state to true to have the React update the DOM
       this.setState({
@@ -57,7 +58,7 @@ class Hoops extends React.Component {
       viewerElement = <div></div>;
     } else {
       // Now that the viewer is instantiated, we can render any other components that depend on it (like UI for the viewer or part info)
-      let terminalOutput = [<p>The libsc server is ready to capture updates...</p>];
+      let terminalOutput = [<p key="defaultKey">The libsc server is ready to capture updates...</p>];
 
       if (this.state.libScStdOut.length > 0) {
         for (let [index, stdoutline] of this.state.libScStdOut.entries()) {
